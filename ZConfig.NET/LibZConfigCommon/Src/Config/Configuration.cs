@@ -36,9 +36,20 @@ namespace LibZConfig.Common.Config
         {
 
         }
+
+        /// <summary>
+        /// Create a property missing exception.
+        /// </summary>
+        /// <param name="property">Property name</param>
+        /// <returns>Configuration Exception</returns>
+        public static ConfigurationException PropertyMissingException(string property)
+        {
+            return new ConfigurationException(String.Format("Required property missing : [name={0}]", property));
+        }
     }
 
     public class Configuration
     {
+        public ConfigurationSettings Settings { get; set; }
     }
 }

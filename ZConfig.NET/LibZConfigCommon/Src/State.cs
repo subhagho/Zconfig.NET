@@ -39,6 +39,19 @@ namespace LibZConfig.Common
         }
 
         /// <summary>
+        /// Check if this node has errors.
+        /// </summary>
+        /// <returns>Has Error?</returns>
+        public bool HasError()
+        {
+            if (State.Equals(GetErrorState()))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Abstract method to be implemented for specifying the error state.
         /// </summary>
         /// <returns>Error state enum</returns>

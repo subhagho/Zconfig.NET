@@ -44,7 +44,7 @@ namespace LibZConfig.Common.Config.Nodes
         /// Check if the Node is in Synced mode.
         /// </summary>
         /// <returns>Is Synced?</returns>
-        public bool isSynced()
+        public bool IsSynced()
         {
             return State.Equals(ENodeState.Synced);
         }
@@ -53,7 +53,7 @@ namespace LibZConfig.Common.Config.Nodes
         /// Check if the Node is Deleted.
         /// </summary>
         /// <returns>Is Deleted?</returns>
-        public bool isDeleted()
+        public bool IsDeleted()
         {
             return State.Equals(ENodeState.Deleted);
         }
@@ -62,7 +62,7 @@ namespace LibZConfig.Common.Config.Nodes
         /// Check if the Node is Updated.
         /// </summary>
         /// <returns></returns>
-        public bool isUpdated()
+        public bool IsUpdated()
         {
             return State.Equals(ENodeState.Updated);
         }
@@ -197,7 +197,7 @@ namespace LibZConfig.Common.Config.Nodes
         /// </summary>
         public void Updated()
         {
-            if (!State.isSynced())
+            if (!State.IsSynced())
             {
                 State.State = ENodeState.Updated;
             }
@@ -209,11 +209,11 @@ namespace LibZConfig.Common.Config.Nodes
         /// <returns>Is Deleted?</returns>
         public bool Deleted()
         {
-            if (State.isSynced() || State.isUpdated())
+            if (State.IsSynced() || State.IsUpdated())
             {
                 State.State = ENodeState.Deleted;
             }
-            return State.isDeleted();
+            return State.IsDeleted();
         }
 
         /// <summary>
@@ -239,7 +239,7 @@ namespace LibZConfig.Common.Config.Nodes
         /// </summary>
         /// <param name="path">List of tokenized path elements.</param>
         /// <param name="index">Current Index in the List</param>
-        /// <returns></returns>
+        /// <returns>Configuration Node</returns>
         public abstract AbstractConfigNode Find(List<string> path, int index);
 
         /// <summary>
@@ -250,7 +250,13 @@ namespace LibZConfig.Common.Config.Nodes
         /// <summary>
         /// Method to validate the node instance.
         /// </summary>
-        public abstract void validate();
+        public virtual void Validate()
+        {
+            if (string.IsNullOrWhiteSpace(Name))
+            {
+                throw ConfigurationException.PropertyMissingException("Name");
+            }
+        }
 
         /// <summary>
         /// Method to recursively update the state of the nodes.
