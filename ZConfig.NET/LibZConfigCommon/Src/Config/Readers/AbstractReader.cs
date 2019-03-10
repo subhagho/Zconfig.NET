@@ -133,7 +133,7 @@ namespace LibZConfig.Common.Config.Readers
         /// Get the stream reader handle.
         /// </summary>
         /// <returns>Stream Reader handle</returns>
-        public abstract StreamReader GetFileStream();
+        public abstract StreamReader GetStream();
     }
 
     /// <summary>
@@ -194,7 +194,7 @@ namespace LibZConfig.Common.Config.Readers
         /// Get the stream associated with this reader.
         /// </summary>
         /// <returns>Stream reader</returns>
-        public override StreamReader GetFileStream()
+        public override StreamReader GetStream()
         {
             if (!State.IsOpen())
             {
@@ -280,7 +280,7 @@ namespace LibZConfig.Common.Config.Readers
         /// Get the stream associated with this reader.
         /// </summary>
         /// <returns>Stream reader</returns>
-        public override StreamReader GetFileStream()
+        public override StreamReader GetStream()
         {
             if (!State.IsOpen())
             {

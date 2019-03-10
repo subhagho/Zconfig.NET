@@ -193,6 +193,15 @@ namespace LibZConfig.Common.Config
         }
 
         /// <summary>
+        /// Set the configuration to error state with the specified exception.
+        /// </summary>
+        /// <param name="ex">Exception</param>
+        public void SetError(Exception ex)
+        {
+            configState.SetError(ex);
+        }
+
+        /// <summary>
         /// Perform Post-Load operations.
         /// </summary>
         public void PostLoad()
