@@ -51,6 +51,19 @@ namespace LibZConfig.Common.Config.Nodes
         }
 
         /// <summary>
+        /// Add all the elements in the passed list.
+        /// </summary>
+        /// <param name="values">List of Elements</param>
+        public void AddAll(List<T> values)
+        {
+            Contract.Requires(values != null && values.Count > 0);
+            foreach(T value in values)
+            {
+                this.values.Add(value);
+            }
+        }
+
+        /// <summary>
         /// Get the configuration node at the specified index.
         /// </summary>
         /// <param name="index">List index</param>
@@ -165,6 +178,33 @@ namespace LibZConfig.Common.Config.Nodes
         public override AbstractConfigNode Find(List<string> path, int index)
         {
             string name = path[index];
+            if (name.Length == 1 && name[0] == ConfigurationSettings.NODE_SEARCH_WILDCARD)
+            {
+                if (GetValues().Count > 0)
+                {
+                    List<AbstractConfigNode> nodes = new List<AbstractConfigNode>();
+                    foreach (ConfigValueNode value in GetValues())
+                    {
+                        AbstractConfigNode sn = value.Find(path, index + 1);
+                        if (sn != null)
+                        {
+                            nodes.Add(sn);
+                        }
+                    }
+                    if (nodes.Count == 1)
+                    {
+                        return nodes[0];
+                    }
+                    else if (nodes.Count > 1)
+                    {
+                        ConfigSearchResult result = new ConfigSearchResult();
+                        result.Configuration = Configuration;
+                        result.AddAll(nodes);
+                        return result;
+                    }
+                }
+                return null;
+            }
             ResolvedName resolved = ConfigUtils.ResolveName(name, Name, Configuration.Settings);
             if (resolved == null)
             {
@@ -202,6 +242,33 @@ namespace LibZConfig.Common.Config.Nodes
         public override AbstractConfigNode Find(List<string> path, int index)
         {
             string name = path[index];
+            if (name.Length == 1 && name[0] == ConfigurationSettings.NODE_SEARCH_WILDCARD)
+            {
+                if (GetValues().Count > 0)
+                {
+                    List<AbstractConfigNode> nodes = new List<AbstractConfigNode>();
+                    foreach (ConfigElementNode value in GetValues())
+                    {
+                        AbstractConfigNode sn = value.Find(path, index + 1);
+                        if (sn != null)
+                        {
+                            nodes.Add(sn);
+                        }
+                    }
+                    if (nodes.Count == 1)
+                    {
+                        return nodes[0];
+                    }
+                    else if (nodes.Count > 1)
+                    {
+                        ConfigSearchResult result = new ConfigSearchResult();
+                        result.Configuration = Configuration;
+                        result.AddAll(nodes);
+                        return result;
+                    }
+                }
+                return null;
+            }
             ResolvedName resolved = ConfigUtils.ResolveName(name, Name, Configuration.Settings);
             if (resolved == null)
             {

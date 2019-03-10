@@ -1,9 +1,46 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
 namespace LibZConfig.Common.Config.Nodes
 {
+    /// <summary>
+    /// Exception class to be used to propogate configuration search errors.
+    /// </summary>
+    public class ConfigNotFound : Exception
+    {
+        private static readonly string __PREFIX = "Node Not Found : {0}";
+
+        /// <summary>
+        /// Constructor with error message.
+        /// </summary>
+        /// <param name="mesg">Error message</param>
+        public ConfigNotFound(string mesg) : base(String.Format(__PREFIX, mesg))
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor with error message and cause.
+        /// </summary>
+        /// <param name="mesg">Error message</param>
+        /// <param name="cause">Cause</param>
+        public ConfigNotFound(string mesg, Exception cause) : base(String.Format(__PREFIX, mesg), cause)
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor with cause.
+        /// </summary>
+        /// <param name="exception">Cause</param>
+        public ConfigNotFound(Exception exception) : base(String.Format(__PREFIX, exception.Message), exception)
+        {
+
+        }
+    }
+
     /// <summary>
     /// Enum to define the state of a configuration node.
     /// </summary>
@@ -254,7 +291,7 @@ namespace LibZConfig.Common.Config.Nodes
         {
             if (string.IsNullOrWhiteSpace(Name))
             {
-                throw ConfigurationException.PropertyMissingException("Name");
+                throw ConfigurationException.PropertyMissingException(nameof(Name));
             }
         }
 

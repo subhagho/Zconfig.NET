@@ -28,16 +28,29 @@ namespace LibZConfig.Common.Config.Nodes
 
         }
 
+        /// <summary>
+        /// Get all the child nodes.
+        /// </summary>
+        /// <returns>Child Nodes</returns>
         public Dictionary<string, AbstractConfigNode> GetChildren()
         {
             return children;
         }
 
+        /// <summary>
+        /// Set the map of child nodes.
+        /// </summary>
+        /// <param name="children">Map of child nodes</param>
         public void SetChildren(Dictionary<string, AbstractConfigNode> children)
         {
             this.children = children;
         }
 
+        /// <summary>
+        /// Add a new child node.
+        /// </summary>
+        /// <param name="node">Child Conifg node</param>
+        /// <returns>Self</returns>
         public ConfigPathNode AddChildNode(AbstractConfigNode node)
         {
             Contract.Requires(node != null);
@@ -49,6 +62,11 @@ namespace LibZConfig.Common.Config.Nodes
             return this;
         }
 
+        /// <summary>
+        /// Remove a child node by name.
+        /// </summary>
+        /// <param name="name">Node name</param>
+        /// <returns>Self</returns>
         public ConfigPathNode RemoveChildNode(string name)
         {
             if (children.ContainsKey(name))
@@ -59,6 +77,11 @@ namespace LibZConfig.Common.Config.Nodes
             return this;
         }
 
+        /// <summary>
+        /// Get a child node by name.
+        /// </summary>
+        /// <param name="name">Node name</param>
+        /// <returns>Child node if exists</returns>
         public AbstractConfigNode GetChildNode(string name)
         {
             if (children.ContainsKey(name))
@@ -68,16 +91,30 @@ namespace LibZConfig.Common.Config.Nodes
             return null;
         }
 
+        /// <summary>
+        /// Check if this node has any children.
+        /// </summary>
+        /// <returns>Is Empty?</returns>
         public bool IsEmpty()
         {
             return (children.Count == 0);
         }
 
+        /// <summary>
+        /// Get the count of nodes.
+        /// </summary>
+        /// <returns>Node count</returns>
         public int Count()
         {
             return children.Count;
         }
 
+        /// <summary>
+        /// Abstract method to be implemented to enable searching.
+        /// </summary>
+        /// <param name="path">List of tokenized path elements.</param>
+        /// <param name="index">Current Index in the List</param>
+        /// <returns>Configuration Node</returns>
         public override AbstractConfigNode Find(List<string> path, int index)
         {
             string name = path[index];
@@ -124,9 +161,42 @@ namespace LibZConfig.Common.Config.Nodes
             return null;
         }
 
+        /// <summary>
+        /// Find a child node that matches the search.
+        /// </summary>
+        /// <param name="path">List of tokenized path elements.</param>
+        /// <param name="index">Current Index</param>
+        /// <returns>Config node if found</returns>
         private AbstractConfigNode FindChild(List<string> path, int index)
         {
             string name = path[index + 1];
+            if (name.Length == 1 && name[0] == ConfigurationSettings.NODE_SEARCH_WILDCARD)
+            {
+                if (children.Count > 0)
+                {
+                    List<AbstractConfigNode> nodes = new List<AbstractConfigNode>();
+                    foreach (string key in children.Keys)
+                    {
+                        AbstractConfigNode sn = children[key].Find(path, index + 1);
+                        if (sn != null)
+                        {
+                            nodes.Add(sn);
+                        }
+                    }
+                    if (nodes.Count == 1)
+                    {
+                        return nodes[0];
+                    }
+                    else if (nodes.Count > 1)
+                    {
+                        ConfigSearchResult result = new ConfigSearchResult();
+                        result.Configuration = Configuration;
+                        result.AddAll(nodes);
+                        return result;
+                    }
+                }
+                return null;
+            }
             ResolvedName resolved = ConfigUtils.ResolveName(name, Name, Configuration.Settings);
             if (resolved == null)
             {
@@ -146,6 +216,9 @@ namespace LibZConfig.Common.Config.Nodes
             return null;
         }
 
+        /// <summary>
+        /// Method to be invoked post configuration load.
+        /// </summary>
         public override void PostLoad()
         {
             if (State.HasError())
@@ -155,21 +228,28 @@ namespace LibZConfig.Common.Config.Nodes
             UpdateState(ENodeState.Synced);
         }
 
+        /// <summary>
+        /// Method to recursively update the state of the nodes.
+        /// </summary>
+        /// <param name="state">Updated state</param>
         public override void UpdateState(ENodeState state)
         {
             State.State = state;
-            foreach(string key in children.Keys)
+            foreach (string key in children.Keys)
             {
                 children[key].UpdateState(state);
             }
         }
 
+        /// <summary>
+        /// Method to validate the node instance.
+        /// </summary>
         public override void Validate()
         {
             base.Validate();
             if (IsEmpty())
             {
-                throw ConfigurationException.PropertyMissingException("Children");
+                throw ConfigurationException.PropertyMissingException(nameof(children));
             }
             foreach (string key in children.Keys)
             {
