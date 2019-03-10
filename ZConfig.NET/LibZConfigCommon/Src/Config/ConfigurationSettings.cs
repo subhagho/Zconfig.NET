@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
 using LibZConfig.Common.Utils;
 
 namespace LibZConfig.Common.Config
@@ -86,6 +86,28 @@ namespace LibZConfig.Common.Config
             TemporaryFolder = FileUtils.GetTempDirectory("ZConfig");
             DownloadOptions = EDownloadOptions.LoadRemoteResourcesOnDemand;
             ShutdownOptions = EShutdownOptions.ReuseData;
+        }
+
+        /// <summary>
+        /// Return an path to the temporary directory with the sub-directory is specified.
+        /// Will create the path if required.
+        /// </summary>
+        /// <param name="subdir">Sub-directory path</param>
+        /// <returns>Temporary directory path</returns>
+        public string GetTempDirectory(string subdir)
+        {
+            string dir = TemporaryFolder;
+            if (!String.IsNullOrWhiteSpace(subdir))
+            {
+                dir = String.Format("{0}{1}{2}", dir, Path.PathSeparator, subdir);
+            }
+            DirectoryInfo di = new DirectoryInfo(dir);
+            if (!di.Exists)
+            {
+                LogUtils.Debug(String.Format("Creating temporary folder: [path={0}]", di.FullName));
+                di.Create();
+            } 
+            return di.FullName;
         }
     }
 }

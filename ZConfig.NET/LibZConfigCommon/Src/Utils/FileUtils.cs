@@ -93,4 +93,57 @@ namespace LibZConfig.Common.Utils
             }
         }
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public enum EUriType
+    {
+        none,
+        file,
+        http,
+        https,
+        ftp
+    }
+
+    public static class URIUtils
+    {
+        public static EUriType GetUriType(Uri location)
+        {
+            if (location.Scheme == Uri.UriSchemeFile)
+            {
+                return EUriType.file;
+            }
+            else if (location.Scheme == Uri.UriSchemeFtp)
+            {
+                return EUriType.ftp;
+            }
+            else if (location.Scheme == Uri.UriSchemeHttp)
+            {
+                return EUriType.http;
+            }
+            else if (location.Scheme == Uri.UriSchemeHttps)
+            {
+                return EUriType.https;
+            }
+            
+            return EUriType.none;
+        }
+    
+        public static string GetUriScheme(EUriType type)
+        {
+            switch(type)
+            {
+                case EUriType.file:
+                    return String.Format("{0}{1}", Uri.UriSchemeFile, Uri.SchemeDelimiter);
+                case EUriType.ftp:
+                    return String.Format("{0}{1}", Uri.UriSchemeFtp, Uri.SchemeDelimiter);
+                case EUriType.http:
+                    return String.Format("{0}{1}", Uri.UriSchemeHttp, Uri.SchemeDelimiter);
+                case EUriType.https:
+                    return String.Format("{0}{1}", Uri.UriSchemeHttps, Uri.SchemeDelimiter);
+            }
+            return null;
+        }
+    }
 }
