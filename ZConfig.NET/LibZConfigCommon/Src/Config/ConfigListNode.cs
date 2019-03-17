@@ -23,6 +23,24 @@ namespace LibZConfig.Common.Config.Nodes
         private List<T> values = new List<T>();
 
         /// <summary>
+        /// Default Empty constructor
+        /// </summary>
+        protected ConfigListNode() : base()
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor with configuration instance and parent node.
+        /// </summary>
+        /// <param name="configuration">Configuration instance</param>
+        /// <param name="parent">Parent node.</param>
+        protected ConfigListNode(Configuration configuration, AbstractConfigNode parent) : base(configuration, parent)
+        {
+
+        }
+
+        /// <summary>
         /// Get the list of values.
         /// </summary>
         /// <returns>List of Values</returns>
@@ -169,6 +187,25 @@ namespace LibZConfig.Common.Config.Nodes
     /// </summary>
     public class ConfigListValueNode : ConfigListNode<ConfigValueNode>
     {
+
+        /// <summary>
+        /// Default Empty constructor
+        /// </summary>
+        public ConfigListValueNode() : base()
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor with configuration instance and parent node.
+        /// </summary>
+        /// <param name="configuration">Configuration instance</param>
+        /// <param name="parent">Parent node.</param>
+        public ConfigListValueNode(Configuration configuration, AbstractConfigNode parent) : base(configuration, parent)
+        {
+
+        }
+
         /// <summary>
         /// Abstract method to be implemented to enable searching.
         /// </summary>
@@ -233,6 +270,24 @@ namespace LibZConfig.Common.Config.Nodes
     /// </summary>
     public class ConfigElementListNode : ConfigListNode<ConfigElementNode>
     {
+        /// <summary>
+        /// Default Empty constructor
+        /// </summary>
+        public ConfigElementListNode() : base()
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor with configuration instance and parent node.
+        /// </summary>
+        /// <param name="configuration">Configuration instance</param>
+        /// <param name="parent">Parent node.</param>
+        public ConfigElementListNode(Configuration configuration, AbstractConfigNode parent) : base(configuration, parent)
+        {
+
+        }
+
         /// <summary>
         /// Abstract method to be implemented to enable searching.
         /// </summary>

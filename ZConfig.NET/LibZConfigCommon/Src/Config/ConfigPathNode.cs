@@ -6,7 +6,7 @@ using LibZConfig.Common.Config;
 
 namespace LibZConfig.Common.Config.Nodes
 {
-    public class ConfigPathNode : AbstractConfigNode
+    public class ConfigPathNode : ConfigElementNode
     {
         private Dictionary<string, AbstractConfigNode> children = new Dictionary<string, AbstractConfigNode>();
 

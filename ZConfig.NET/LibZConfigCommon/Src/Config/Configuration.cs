@@ -91,6 +91,10 @@ namespace LibZConfig.Common.Config
     public class ConfigurationHeader
     {
         /// <summary>
+        /// Unique Configuration ID.
+        /// </summary>
+        public string Id { get; set; }
+        /// <summary>
         /// Application Group this configuration belong to.
         /// </summary>
         public string ApplicationGroup { get; set; }
@@ -225,6 +229,10 @@ namespace LibZConfig.Common.Config
             if (Header == null)
             {
                 throw ConfigurationException.PropertyMissingException(nameof(Header));
+            }
+            if (String.IsNullOrWhiteSpace(Header.Id))
+            {
+                throw ConfigurationException.PropertyMissingException(nameof(Header.Id));
             }
             if (String.IsNullOrWhiteSpace(Header.ApplicationGroup))
             {
