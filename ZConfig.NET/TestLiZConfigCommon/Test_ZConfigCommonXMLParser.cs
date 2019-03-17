@@ -6,6 +6,7 @@ namespace LibZConfig.Common.Config.Parsers
 {
     public class Test_ZConfigCommonXMLParser
     {
+
         [Fact]
         public void Parse()
         {

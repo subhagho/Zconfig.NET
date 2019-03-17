@@ -24,22 +24,17 @@
   -->
 
 <root>
-    <header>
-        <id>UNIQUE-99918239014</id>
-        <group>TEST-APP-GROUP</group>
-        <application>TEST-APPLICATION</application>
-        <applicationName>test-config-included</applicationName>
-        <description>This is a test JSON configuration file.</description>
-        <version>0.2</version>
-        <createdBy>
-            <user>subho</user>
-            <timestamp>12.31.2018 12:32:19</timestamp>
-        </createdBy>
-        <updatedBy>
-            <user>subho</user>
-            <timestamp>01.02.2019 12:32:19</timestamp>
-        </updatedBy>
-    </header>
+  <header id="UNIQUE-99918239015" group="TEST-APP-GROUP" application="TEST-APPLICATION" name="test-config-included" version="0.2">
+    <description>This is a test JSON configuration file.</description>
+    <createdBy>
+      <user>subho</user>
+      <timestamp>1552835141000</timestamp>
+    </createdBy>
+    <updatedBy>
+      <user>subho</user>
+      <timestamp>1552835141000</timestamp>
+    </updatedBy>
+  </header>
     <root-node>
         <nodeVersion>2</nodeVersion>
         <createdBy>

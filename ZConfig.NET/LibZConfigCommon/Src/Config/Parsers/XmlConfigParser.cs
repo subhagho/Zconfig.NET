@@ -38,6 +38,22 @@ namespace LibZConfig.Common.Config.Parsers
         /// XML Attribute: Configuration Version
         /// </summary>
         public const string XML_CONFIG_HEADER_ATTR_VERSION = "version";
+        /// <summary>
+        /// XML Node: Created By
+        /// </summary>
+        public const string XML_CONFIG_HEADER_CREATED_BY = "createdBy";
+        /// <summary>
+        /// XML Node: Updated By
+        /// </summary>
+        public const string XML_CONFIG_HEADER_UPDATED_BY = "updatedBy";
+        /// <summary>
+        /// XML Attribute: Modified By User
+        /// </summary>
+        public const string XML_CONFIG_HEADER_MB_ATTR_USER = "user";
+        /// <summary>
+        /// XML Attribute: Modified At Timestamp
+        /// </summary>
+        public const string XML_CONFIG_HEADER_MB_ATTR_TIME = "timestamp";
 
         /// <summary>
         /// Parse a new configuration instance.
@@ -327,6 +343,31 @@ namespace LibZConfig.Common.Config.Parsers
                 {
                     throw new ConfigurationException(String.Format("Invalid Configuration: Name mis-match. [expected={0}][actual={1}]", name, header.Name));
                 }
+                if (elem.HasChildNodes)
+                {
+                    foreach(XmlNode node in elem.ChildNodes)
+                    {
+                        if (node.NodeType == XmlNodeType.Element)
+                        {
+                            if (node.Name == XML_CONFIG_HEADER_CREATED_BY)
+                            {
+                                ModifiedBy mb = ParseModifiedBy((XmlElement)node);
+                                if (mb != null)
+                                {
+                                    header.CreatedBy = mb;
+                                }
+                            }
+                            else if (node.Name == XML_CONFIG_HEADER_UPDATED_BY)
+                            {
+                                ModifiedBy mb = ParseModifiedBy((XmlElement)node);
+                                if (mb != null)
+                                {
+                                    header.ModifiedBy = mb;
+                                }
+                            }
+                        }
+                    }
+                }
                 LogUtils.Debug(String.Format("Loaded Header: [name={0}]", header.Name), header);
                 configuration.Header = header;
             }
@@ -334,6 +375,35 @@ namespace LibZConfig.Common.Config.Parsers
             {
                 throw new ConfigurationException(String.Format("Error loading configuration header: No attributes defined. [name={0}]", name));
             }
+        }
+
+        /// <summary>
+        /// Parse a modification info node.
+        /// </summary>
+        /// <param name="elem">XML Element</param>
+        /// <returns>Modification info</returns>
+        private ModifiedBy ParseModifiedBy(XmlElement elem)
+        {
+            if (elem.HasAttributes)
+            {
+                ModifiedBy mb = new ModifiedBy();
+                XmlAttribute attr = elem.Attributes[XML_CONFIG_HEADER_MB_ATTR_USER];
+                if (attr != null)
+                {
+                    mb.User = attr.Value;
+                }
+                attr = elem.Attributes[XML_CONFIG_HEADER_MB_ATTR_TIME];
+                if (attr != null)
+                {
+                    string ts = attr.Value;
+                    if (!String.IsNullOrWhiteSpace(ts))
+                    {
+                        mb.Timestamp = Int64.Parse(ts);
+                    }
+                }
+                return mb;
+            }
+            return null;
         }
 
         /// <summary>
