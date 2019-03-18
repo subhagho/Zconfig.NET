@@ -69,6 +69,7 @@ namespace LibZConfig.Common.Config.Parsers
                 settings = new ConfigurationSettings();
             }
             configuration = new Configuration(settings);
+            this.settings = settings;
             LogUtils.Info(String.Format("Loading Configuration: [name={0}]", name));
             try
             {

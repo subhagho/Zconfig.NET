@@ -32,6 +32,7 @@ namespace LibZConfig.Common.Config.Parsers
 
                 using(FileReader reader = new FileReader(cfile))
                 {
+                    reader.Open();
                     XmlConfigParser parser = new XmlConfigParser();
                     parser.Parse(cname, reader, Version.Parse(version), null);
                 }

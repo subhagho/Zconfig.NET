@@ -134,6 +134,11 @@ namespace LibZConfig.Common.Config.Readers
         /// </summary>
         /// <returns>Stream Reader handle</returns>
         public abstract StreamReader GetStream();
+
+        protected AbstractReader()
+        {
+            State = new ReaderState();
+        }
     }
 
     /// <summary>
