@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Diagnostics.Contracts;
@@ -74,6 +73,70 @@ namespace LibZConfig.Common.Config.Readers
         /// Reader is in exception state.
         /// </summary>
         Error
+    }
+
+    /// <summary>
+    /// Helper class for providing parsers for the Reader Type.
+    /// </summary>
+    public static class ReaderTypeHelper
+    {
+
+        /// <summary>
+        /// Get a configuration reader instance based on the type.
+        /// </summary>
+        /// <param name="type">Reader Type</param>
+        /// <param name="uri">URI</param>
+        /// <returns>Configuration Reader</returns>
+        public static AbstractReader GetReader(EUriScheme type, Uri uri)
+        {
+            switch (type)
+            {
+                case EUriScheme.file:
+                    return new FileReader(uri);
+                case EUriScheme.http:
+                case EUriScheme.https:
+                    return new RemoteReader(uri);
+                case EUriScheme.ftp:
+                    return new FtpRemoteReader(uri);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Get a configuration reader instance based on the URI.
+        /// </summary>
+        /// <param name="uri">URI</param>
+        /// <returns>Configuration Reader</returns>
+        public static AbstractReader GetReader(Uri uri)
+        {
+            EUriScheme type = EUriScheme.none.GetUriType(uri);
+            return GetReader(type, uri);
+        }
+
+        /// <summary>
+        /// Parse the passed string as a URI location.
+        /// </summary>
+        /// <param name="path">String path</param>
+        /// <returns>Parsed URI</returns>
+        public static Uri ParseUri(string path)
+        {
+            if (!String.IsNullOrWhiteSpace(path))
+            {
+                path = path.Trim();
+                if (path.StartsWith(Uri.UriSchemeFile)
+                    || path.StartsWith(Uri.UriSchemeHttp)
+                    || path.StartsWith(Uri.UriSchemeHttps))
+                {
+                    return new Uri(path);
+                }
+                else
+                {
+                    FileInfo file = new FileInfo(path);
+                    return new Uri(file.FullName);
+                }
+            }
+            return null;
+        }
     }
 
     /// <summary>
@@ -166,14 +229,10 @@ namespace LibZConfig.Common.Config.Readers
         public FileReader(Uri location)
         {
             Contract.Requires(location != null);
-            if (!location.IsWellFormedOriginalString())
+            EUriScheme type = EUriScheme.none.GetUriType(location);
+            if (type != EUriScheme.file)
             {
-                throw new ReaderException(String.Format("Malformed URI : [location={0}]", location.ToString()));
-            }
-            EUriType type = URIUtils.GetUriType(location);
-            if (type != EUriType.file)
-            {
-                var ex = new ReaderException(String.Format("Invalid URI : [expected={0}][actual={1}]", EUriType.file.ToString(), type.ToString()));
+                var ex = new ReaderException(String.Format("Invalid URI : [expected={0}][actual={1}]", EUriScheme.file.ToString(), type.ToString()));
                 State.SetError(ex);
                 throw ex;
             }
@@ -240,6 +299,8 @@ namespace LibZConfig.Common.Config.Readers
     {
         private Uri location;
         private StreamReader stream;
+        private string username = null;
+        private string password = null;
 
         /// <summary>
         /// Constructor with Uri string.
@@ -302,10 +363,22 @@ namespace LibZConfig.Common.Config.Readers
             try
             {
                 LogUtils.Debug("Opening URI Stream: [uri={0}]", location.ToString());
-                WebRequest request = WebRequest.Create(location);
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(location);
+                if (!String.IsNullOrWhiteSpace(username) && !String.IsNullOrWhiteSpace(password))
+                {
+                    NetworkCredential ncreds = new NetworkCredential(username, password);
+                    CredentialCache ccache = new CredentialCache();
+                    ccache.Add(location, "Basic", ncreds);
+
+                    request.PreAuthenticate = true;
+                    request.Credentials = ccache;
+                }
+
                 WebResponse response = request.GetResponse();
                 Stream dataStream = response.GetResponseStream();
                 stream = new StreamReader(dataStream);
+
+                State.State = EReaderState.Open;
             }
             catch (Exception ex)
             {
@@ -313,6 +386,147 @@ namespace LibZConfig.Common.Config.Readers
                 LogUtils.Error(ex);
                 throw ex;
             }
+        }
+
+        /// <summary>
+        /// Set the username for the Web request.
+        /// </summary>
+        /// <param name="username">Web User</param>
+        /// <returns>Self</returns>
+        public RemoteReader WithUser(string username)
+        {
+            Contract.Requires(!String.IsNullOrWhiteSpace(username));
+            this.username = username;
+            return this;
+        }
+
+        /// <summary>
+        /// Set the password for the Web request.
+        /// </summary>
+        /// <param name="password">Web Password</param>
+        /// <returns>Self</returns>
+        public RemoteReader WithPassword(string password)
+        {
+            Contract.Requires(!String.IsNullOrWhiteSpace(username));
+            this.password = password;
+            return this;
+        }
+    }
+
+    /// <summary>
+    /// Reader implementation to read from URI location.
+    /// </summary>
+    public class FtpRemoteReader : AbstractReader
+    {
+        private const string DEFAULT_USER = "anonymous";
+        private const string DEFAULT_PASSWD = "janeDoe@contoso.com";
+
+        private Uri location;
+        private StreamReader stream;
+        private string username = DEFAULT_USER;
+        private string password = DEFAULT_PASSWD;
+
+        /// <summary>
+        /// Constructor with Uri string.
+        /// </summary>
+        /// <param name="location">Uri String</param>
+        public FtpRemoteReader(string location)
+        {
+            Contract.Requires(!String.IsNullOrWhiteSpace(location));
+            this.location = new Uri(location);
+            if (!this.location.IsWellFormedOriginalString())
+            {
+                throw new ReaderException(String.Format("Malformed URI : [location={0}]", location));
+            }
+        }
+
+        /// <summary>
+        /// Constructor with Uri
+        /// </summary>
+        /// <param name="location">Uri location</param>
+        public FtpRemoteReader(Uri location)
+        {
+            Contract.Requires(location != null);
+            this.location = location;
+            if (!this.location.IsWellFormedOriginalString())
+            {
+                throw new ReaderException(String.Format("Malformed URI : [location={0}]", location.ToString()));
+            }
+        }
+
+        /// <summary>
+        /// Disposable handler
+        /// </summary>
+        public override void Dispose()
+        {
+            if (stream != null)
+            {
+                stream.Dispose();
+            }
+            State.State = EReaderState.Closed;
+        }
+
+        /// <summary>
+        /// Get the stream associated with this reader.
+        /// </summary>
+        /// <returns>Stream reader</returns>
+        public override StreamReader GetStream()
+        {
+            if (!State.IsOpen())
+            {
+                throw new ReaderException(String.Format("Reader is not Open: [state={0}]", State.State.ToString()));
+            }
+            return stream;
+        }
+
+        /// <summary>
+        /// Open this reader.
+        /// </summary>
+        public override void Open()
+        {
+            try
+            {
+                LogUtils.Debug("Opening URI Stream: [uri={0}]", location.ToString());
+                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(location);
+                request.Method = WebRequestMethods.Ftp.DownloadFile;
+                request.Credentials = new NetworkCredential(username, password);
+
+                FtpWebResponse response = (FtpWebResponse)request.GetResponse();
+                Stream dataStream = response.GetResponseStream();
+                stream = new StreamReader(dataStream);
+
+                State.State = EReaderState.Open;
+            }
+            catch (Exception ex)
+            {
+                State.SetError(ex);
+                LogUtils.Error(ex);
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// Set the username for the FTP request.
+        /// </summary>
+        /// <param name="username">FTP User</param>
+        /// <returns>Self</returns>
+        public FtpRemoteReader WithUser(string username)
+        {
+            Contract.Requires(!String.IsNullOrWhiteSpace(username));
+            this.username = username;
+            return this;
+        }
+
+        /// <summary>
+        /// Set the password for the FTP request.
+        /// </summary>
+        /// <param name="password">FTP Password</param>
+        /// <returns>Self</returns>
+        public FtpRemoteReader WithPassword(string password)
+        {
+            Contract.Requires(!String.IsNullOrWhiteSpace(username));
+            this.password = password;
+            return this;
         }
     }
 }

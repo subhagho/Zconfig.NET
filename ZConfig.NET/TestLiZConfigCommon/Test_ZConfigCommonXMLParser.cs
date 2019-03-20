@@ -9,6 +9,7 @@ namespace LibZConfig.Common.Config.Parsers
     public class Test_ZConfigCommonXMLParser
     {
         private const string CONFIG_BASIC_PROPS_FILE = @"..\..\..\Resources\XML\test-config.properties";
+        private const string CONFIG_INCLUDE_PROPS_FILE = @"..\..\..\Resources\XML\test-config-include.properties";
         private const string CONFIG_PROP_NAME = "config.name";
         private const string CONFIG_PROP_FILENAME = "config.file";
         private const string CONFIG_PROP_VERSION = "config.version";
@@ -31,6 +32,40 @@ namespace LibZConfig.Common.Config.Parsers
                 LogUtils.Info(String.Format("Reading Configuration: [file={0}][version={1}]", cfile, version));
 
                 using(FileReader reader = new FileReader(cfile))
+                {
+                    reader.Open();
+                    XmlConfigParser parser = new XmlConfigParser();
+                    ConfigurationSettings settings = new ConfigurationSettings();
+                    settings.DownloadOptions = EDownloadOptions.LoadRemoteResourcesOnStartup;
+
+                    parser.Parse(cname, reader, Version.Parse(version), settings);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogUtils.Error(ex);
+                throw ex;
+            }
+        }
+
+        [Fact]
+        public void ParseInlcude()
+        {
+            try
+            {
+                Properties properties = new Properties();
+                properties.Load(CONFIG_INCLUDE_PROPS_FILE);
+
+                string cname = properties.GetProperty(CONFIG_PROP_NAME);
+                Assert.False(String.IsNullOrWhiteSpace(cname));
+                string cfile = properties.GetProperty(CONFIG_PROP_FILENAME);
+                Assert.False(String.IsNullOrWhiteSpace(cfile));
+                string version = properties.GetProperty(CONFIG_PROP_VERSION);
+                Assert.False(String.IsNullOrWhiteSpace(version));
+
+                LogUtils.Info(String.Format("Reading Configuration: [file={0}][version={1}]", cfile, version));
+
+                using (FileReader reader = new FileReader(cfile))
                 {
                     reader.Open();
                     XmlConfigParser parser = new XmlConfigParser();

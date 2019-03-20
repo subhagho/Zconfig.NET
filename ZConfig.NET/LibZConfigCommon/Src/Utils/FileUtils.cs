@@ -46,7 +46,7 @@ namespace LibZConfig.Common.Utils
         {
             string path = GetTempDirectory();
             string filename = String.Format("{0}.tmp", Guid.NewGuid().ToString());
-            return String.Format("{0}{1}{2}", path, Path.PathSeparator, filename);
+            return String.Format("{0}{1}{2}", path, Path.DirectorySeparatorChar, filename);
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace LibZConfig.Common.Utils
         public static string GetTempDirectory()
         {
             string app = AppDomain.CurrentDomain.FriendlyName;
-            string path = String.Format("{0}{1}{2}", Path.GetTempPath(), Path.PathSeparator, app);
+            string path = String.Format("{0}{1}{2}", Path.GetTempPath(), Path.DirectorySeparatorChar, app);
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
@@ -72,7 +72,7 @@ namespace LibZConfig.Common.Utils
         public static string GetTempDirectory(string name)
         {
             string path = GetTempDirectory();
-            string dir = String.Format("{0}{1}{2}", path, Path.PathSeparator, name);
+            string dir = String.Format("{0}{1}{2}", path, Path.DirectorySeparatorChar, name);
             if (!File.Exists(dir))
             {
                 Directory.CreateDirectory(dir);
@@ -85,62 +85,176 @@ namespace LibZConfig.Common.Utils
         /// </summary>
         public static void DeleteTempDirectory()
         {
-            string path = GetTempDirectory();
+            DeleteTempDirectory(GetTempDirectory());
+        }
+
+        /// <summary>
+        /// Clean up the temporary folder for this app.
+        /// </summary>
+        /// <param name="path">Directory Path</param>
+        public static void DeleteTempDirectory(string path)
+        {
             var dir = new DirectoryInfo(path);
             if (dir.Exists)
             {
                 dir.Delete(true);
             }
         }
+
+        /// <summary>
+        /// Check if directory exists or create the directory path.
+        /// </summary>
+        /// <param name="path">Directory Path</param>
+        /// <returns>Available?</returns>
+        public static bool CheckDirectory(string path)
+        {
+            FileInfo fi = new FileInfo(path);
+            if (fi.Exists)
+            {
+                if (fi.Attributes.HasFlag(FileAttributes.Directory))
+                {
+                    return true;
+                }
+                return false;
+            }
+            if (Directory.CreateDirectory(fi.FullName) != null)
+                return true;
+            return false;
+        }
+
+        /// <summary>
+        /// Check if the parent directory for this file exists, else create.
+        /// </summary>
+        /// <param name="path">File Path</param>
+        /// <returns>Created?</returns>
+        public static bool CheckFilePath(string path)
+        {
+            FileInfo fi = new FileInfo(path);
+            if (fi.Exists)
+            {
+                if (fi.Attributes.HasFlag(FileAttributes.Directory))
+                {
+                    return false;
+                }
+                return true;
+            }
+            return CheckDirectory(fi.DirectoryName);
+        }
+
+        /// <summary>
+        /// Create a local instance of the reader content.
+        /// </summary>
+        /// <param name="reader">Stream Reader</param>
+        /// <param name="path">File name (path)</param>
+        /// <param name="outdir">Output Directory</param>
+        /// <returns>File Path</returns>
+        public static string WriteLocalFile(StreamReader reader, string path, string outdir)
+        {
+            return WriteLocalFile(reader, path, outdir, true);
+        }
+
+        /// <summary>
+        /// Create a local instance of the reader content.
+        /// </summary>
+        /// <param name="reader">Stream Reader</param>
+        /// <param name="path">File name (path)</param>
+        /// <param name="outdir">Output Directory</param>
+        /// <param name="overwrite">Overwrite if exists</param>
+        /// <returns>File Path</returns>
+        public static string WriteLocalFile(StreamReader reader, string path, string outdir, bool overwrite)
+        {
+            string file = String.Format("{0}\\{1}", outdir, path);
+            FileInfo fi = new FileInfo(file);
+            if (fi.Exists)
+            {
+                if (overwrite)
+                    fi.Delete();
+                else
+                    return fi.FullName;
+            }
+            LogUtils.Debug(String.Format("Writing output to file: {0}", fi.FullName));
+            CheckFilePath(fi.FullName);
+
+            using (StreamWriter writer = new StreamWriter(fi.FullName))
+            {
+                string line = null;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    writer.WriteLine(line);
+                }
+            }
+            return fi.FullName;
+        }
     }
 
     /// <summary>
-    /// 
+    /// Enum for supported URI types.
     /// </summary>
-    public enum EUriType
+    public enum EUriScheme
     {
+        /// <summary>
+        /// No type defined.
+        /// </summary>
         none,
+        /// <summary>
+        /// URI type file.
+        /// </summary>
         file,
+        /// <summary>
+        /// URI type HTTP
+        /// </summary>
         http,
+        /// <summary>
+        /// URI type HTTPS
+        /// </summary>
         https,
+        /// <summary>
+        /// URI type FTP
+        /// </summary>
         ftp
     }
 
-    public static class URIUtils
+    public static class UriUtils
     {
-        public static EUriType GetUriType(Uri location)
+        /// <summary>
+        /// Parse the reader type based on the URI.
+        /// </summary>
+        /// <param name="type">Reference Type</param>
+        /// <param name="uri">URI Path</param>
+        /// <returns>Reader Type.</returns>
+        public static EUriScheme GetUriType(this EUriScheme type, Uri location)
         {
             if (location.Scheme == Uri.UriSchemeFile)
             {
-                return EUriType.file;
+                return EUriScheme.file;
             }
             else if (location.Scheme == Uri.UriSchemeFtp)
             {
-                return EUriType.ftp;
+                return EUriScheme.ftp;
             }
             else if (location.Scheme == Uri.UriSchemeHttp)
             {
-                return EUriType.http;
+                return EUriScheme.http;
             }
             else if (location.Scheme == Uri.UriSchemeHttps)
             {
-                return EUriType.https;
+                return EUriScheme.https;
             }
-            
-            return EUriType.none;
+
+            return EUriScheme.none;
         }
-    
-        public static string GetUriScheme(EUriType type)
+
+        public static string GetUriScheme(EUriScheme type)
         {
-            switch(type)
+            switch (type)
             {
-                case EUriType.file:
+                case EUriScheme.file:
                     return String.Format("{0}{1}", Uri.UriSchemeFile, Uri.SchemeDelimiter);
-                case EUriType.ftp:
+                case EUriScheme.ftp:
                     return String.Format("{0}{1}", Uri.UriSchemeFtp, Uri.SchemeDelimiter);
-                case EUriType.http:
+                case EUriScheme.http:
                     return String.Format("{0}{1}", Uri.UriSchemeHttp, Uri.SchemeDelimiter);
-                case EUriType.https:
+                case EUriScheme.https:
                     return String.Format("{0}{1}", Uri.UriSchemeHttps, Uri.SchemeDelimiter);
             }
             return null;

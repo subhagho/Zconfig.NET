@@ -110,6 +110,7 @@ namespace LibZConfig.Common.Config.Nodes
             else
             {
                 node = new ConfigValueNode(Configuration, this);
+                node.Name = name;
                 values[name] = node;
             }
             node.SetValue(value);

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
 using System.Xml;
 using LibZConfig.Common.Utils;
 using LibZConfig.Common.Config;
@@ -10,9 +10,37 @@ using LibZConfig.Common.Config.Readers;
 namespace LibZConfig.Common.Config.Parsers
 {
     /// <summary>
-    /// Configuration Parser implementation for reading XML configurations.
+    /// XML Constant Definitions for Include Node.
     /// </summary>
-    public class XmlConfigParser : AbstractConfigParser
+    public static class ConstXmlConfigIncludeNode
+    {
+        /// <summary>
+        /// XML Node: Include Node
+        /// </summary>
+        public const string XML_CONFIG_INCLUDE = "include";
+        /// <summary>
+        /// XML Node: Include Node - Config name
+        /// </summary>
+        public const string XML_CONFIG_INCLUDE_NAME = "configName";
+        /// <summary>
+        /// XML Node: Include Node - Config Path
+        /// </summary>
+        public const string XML_CONFIG_INCLUDE_PATH = "path";
+        /// <summary>
+        /// XML Node: Include Node - Config Reader Type
+        /// </summary>
+        public const string XML_CONFIG_INCLUDE_TYPE = "type";
+        /// <summary>
+        /// XML Node: Include Node - Config Version
+        /// </summary>
+        public const string XML_CONFIG_INCLUDE_VERSION = "version";
+
+    }
+
+    /// <summary>
+    /// XML Constant Definitions for Configuration Header.
+    /// </summary>
+    public static class ConstXmlConfigHeader
     {
         /// <summary>
         /// XML Node: Header
@@ -54,6 +82,39 @@ namespace LibZConfig.Common.Config.Parsers
         /// XML Attribute: Modified At Timestamp
         /// </summary>
         public const string XML_CONFIG_HEADER_MB_ATTR_TIME = "timestamp";
+        /// <summary>
+        /// XML Node: Description
+        /// </summary>
+        public const string XML_CONFIG_HEADER_DESC = "description";
+    }
+
+    /// <summary>
+    /// XML Constant Definitions for Resource Node.
+    /// </summary>
+    public static class ConstXmlResourceNode
+    {
+        /// <summary>
+        /// XML Node: Resource
+        /// </summary>
+        public const string XML_CONFIG_NODE_RESOURCE = "remoteResource";
+        /// <summary>
+        /// XML Attribute: Resource Type
+        /// </summary>
+        public const string XML_CONFIG_ATTR_RESOURCE_TYPE = "type";
+        /// <summary>
+        /// XML Attribute: Resource URL
+        /// </summary>
+        public const string XML_CONFIG_NODE_RESOURCE_URL = "url";
+        /// <summary>
+        /// XML Attribute: Resource name.
+        /// </summary>
+        public const string XML_CONFIG_ATTR_RESOURCE_NAME = "resourceName";
+    }
+    /// <summary>
+    /// Configuration Parser implementation for reading XML configurations.
+    /// </summary>
+    public class XmlConfigParser : AbstractConfigParser
+    {
 
         /// <summary>
         /// Parse a new configuration instance.
@@ -107,7 +168,7 @@ namespace LibZConfig.Common.Config.Parsers
             {
                 foreach (XmlNode elem in root.ChildNodes)
                 {
-                    if (elem.Name == XML_CONFIG_NODE_HEADER && elem.NodeType == XmlNodeType.Element)
+                    if (elem.Name == ConstXmlConfigHeader.XML_CONFIG_NODE_HEADER && elem.NodeType == XmlNodeType.Element)
                     {
                         ParseHeader(name, version, (XmlElement)elem);
                     }
@@ -122,7 +183,6 @@ namespace LibZConfig.Common.Config.Parsers
             {
                 throw new ConfigurationException(String.Format("Error parsing configuration: Node stack is not empty. [name={0}]", name));
             }
-            configuration.Validate();
         }
 
         /// <summary>
@@ -174,7 +234,25 @@ namespace LibZConfig.Common.Config.Parsers
                 }
                 else
                 {
-                    if (elem.Name == settings.ParametersNodeName)
+                    if (elem.Name == ConstXmlConfigIncludeNode.XML_CONFIG_INCLUDE)
+                    {
+                        if (parent.GetType() != typeof(ConfigPathNode))
+                        {
+                            throw new ConfigurationException(String.Format("Invalid Stack State: Cannot add List node to parent. [parent={0}]", parent.GetType().FullName));
+                        }
+                        ConfigPathNode pnode = (ConfigPathNode)parent;
+                        AddIncludeNode(pnode, elem);
+                    }
+                    else if (elem.Name == ConstXmlResourceNode.XML_CONFIG_NODE_RESOURCE)
+                    {
+                        if (parent.GetType() != typeof(ConfigPathNode))
+                        {
+                            throw new ConfigurationException(String.Format("Invalid Stack State: Cannot add List node to parent. [parent={0}]", parent.GetType().FullName));
+                        }
+                        ConfigPathNode pnode = (ConfigPathNode)parent;
+                        AddResourceNode(pnode, elem);
+                    }
+                    else if (elem.Name == settings.ParametersNodeName)
                     {
                         if (parent.GetType() != typeof(ConfigPathNode))
                         {
@@ -232,7 +310,7 @@ namespace LibZConfig.Common.Config.Parsers
                         ConfigPathNode cp = (ConfigPathNode)pp;
                         ConfigAttributesNode attrs = new ConfigAttributesNode(cp.Configuration, cp);
                         cp.AddChildNode(attrs);
-                        foreach(XmlAttribute attr in elem.Attributes)
+                        foreach (XmlAttribute attr in elem.Attributes)
                         {
                             attrs.Add(attr.Name, attr.Value);
                         }
@@ -240,7 +318,7 @@ namespace LibZConfig.Common.Config.Parsers
                 }
                 if (elem.HasChildNodes)
                 {
-                    foreach(XmlNode cnode in elem.ChildNodes)
+                    foreach (XmlNode cnode in elem.ChildNodes)
                     {
                         if (cnode.NodeType == XmlNodeType.Element)
                         {
@@ -253,6 +331,147 @@ namespace LibZConfig.Common.Config.Parsers
                     nodeStack.Pop();
                 }
             }
+        }
+
+        /// <summary>
+        /// Create a Resource node instance.
+        /// </summary>
+        /// <param name="parent">Parent Config node</param>
+        /// <param name="elem">XML Element</param>
+        private void AddResourceNode(ConfigPathNode parent, XmlElement elem)
+        {
+            string resourceName = elem.GetAttribute(ConstXmlResourceNode.XML_CONFIG_ATTR_RESOURCE_NAME);
+            if (String.IsNullOrWhiteSpace(resourceName))
+            {
+                throw ConfigurationException.PropertyMissingException(ConstXmlResourceNode.XML_CONFIG_ATTR_RESOURCE_NAME);
+            }
+            string st = elem.GetAttribute(ConstXmlResourceNode.XML_CONFIG_ATTR_RESOURCE_TYPE);
+            if (String.IsNullOrWhiteSpace(st))
+            {
+                throw ConfigurationException.PropertyMissingException(ConstXmlResourceNode.XML_CONFIG_ATTR_RESOURCE_TYPE);
+            }
+            EResourceType type = Enum.Parse<EResourceType>(st);
+            if (type == EResourceType.NONE)
+            {
+                throw ConfigurationException.PropertyMissingException(ConstXmlResourceNode.XML_CONFIG_ATTR_RESOURCE_TYPE);
+            }
+            Uri uri = null;
+            if (elem.HasChildNodes)
+            {
+                foreach(XmlNode nn in elem.ChildNodes)
+                {
+                    if (nn.NodeType == XmlNodeType.Element && nn.Name == ConstXmlResourceNode.XML_CONFIG_NODE_RESOURCE_URL)
+                    {
+                        string su = nn.InnerText;
+                        if (String.IsNullOrWhiteSpace(su))
+                        {
+                            throw ConfigurationException.PropertyMissingException(ConstXmlResourceNode.XML_CONFIG_NODE_RESOURCE_URL);
+                        }
+                        uri = new Uri(su);
+                        break;
+                    }
+                }
+            }
+            
+            if (uri == null)
+            {
+                throw ConfigurationException.PropertyMissingException(ConstXmlResourceNode.XML_CONFIG_NODE_RESOURCE_URL);
+            }
+            ConfigResourceNode node = null;
+            switch(type)
+            {
+                case EResourceType.FILE:
+                    node = new ConfigResourceFile(configuration, parent);
+                    break;
+                case EResourceType.DIRECTORY:
+                    node = new ConfigDirectoryResource(configuration, parent);
+                    break;
+                case EResourceType.BLOB:
+                    node = new ConfigResourceBlob(configuration, parent);
+                    break;
+            }
+            node.Name = elem.Name;
+            node.Type = type;
+            node.Location = uri;
+            node.ResourceName = resourceName;
+            if (settings.DownloadOptions == EDownloadOptions.LoadRemoteResourcesOnStartup)
+            {
+                if (type == EResourceType.BLOB || type == EResourceType.FILE)
+                {
+                    ConfigResourceFile fnode = (ConfigResourceFile)node;
+                    using (AbstractReader reader = ReaderTypeHelper.GetReader(node.Location))
+                    {
+                        if (reader == null)
+                        {
+                            throw new ConfigurationException(String.Format("No reader found for URI. [uri={0}]", node.Location.ToString()));
+                        }
+                        reader.Open();
+                        string file = FileUtils.WriteLocalFile(reader.GetStream(), node.ResourceName, settings.GetTempDirectory());
+                        FileInfo fi = new FileInfo(file);
+                        if (!fi.Exists)
+                        {
+                            throw new ConfigurationException(String.Format("Erorr downloading file: File not created. [file={0}]", fi.FullName));
+                        }
+                        fnode.File = fi;
+                    }
+                }
+            }
+            
+            parent.AddChildNode(node);
+        }
+
+        /// <summary>
+        /// Parse a included configuration reference.
+        /// </summary>
+        /// <param name="parent">Parent Config Node</param>
+        /// <param name="elem">XML Element</param>
+        private void AddIncludeNode(ConfigPathNode parent, XmlElement elem)
+        {
+            string configName = elem.GetAttribute(ConstXmlConfigIncludeNode.XML_CONFIG_INCLUDE_NAME);
+            if (String.IsNullOrWhiteSpace(configName))
+            {
+                throw ConfigurationException.PropertyMissingException(ConstXmlConfigIncludeNode.XML_CONFIG_INCLUDE_NAME);
+            }
+            string path = elem.GetAttribute(ConstXmlConfigIncludeNode.XML_CONFIG_INCLUDE_PATH);
+            if (String.IsNullOrWhiteSpace(path))
+            {
+                throw ConfigurationException.PropertyMissingException(ConstXmlConfigIncludeNode.XML_CONFIG_INCLUDE_PATH);
+            }
+            string st = elem.GetAttribute(ConstXmlConfigIncludeNode.XML_CONFIG_INCLUDE_TYPE);
+            if (String.IsNullOrWhiteSpace(st))
+            {
+                throw ConfigurationException.PropertyMissingException(ConstXmlConfigIncludeNode.XML_CONFIG_INCLUDE_TYPE);
+            }
+            EUriScheme type = Enum.Parse<EUriScheme>(st);
+            if (type == EUriScheme.none)
+            {
+                throw ConfigurationException.PropertyMissingException(ConstXmlConfigIncludeNode.XML_CONFIG_INCLUDE_TYPE);
+            }
+            string vs = elem.GetAttribute(ConstXmlConfigIncludeNode.XML_CONFIG_INCLUDE_VERSION);
+            if (String.IsNullOrWhiteSpace(vs))
+            {
+                throw ConfigurationException.PropertyMissingException(ConstXmlConfigIncludeNode.XML_CONFIG_INCLUDE_VERSION);
+            }
+            Version version = Version.Parse(vs);
+
+            ConfigIncludeNode node = new ConfigIncludeNode(configuration, parent);
+            node.Name = elem.Name;
+            node.ConfigName = configName;
+            node.Path = ReaderTypeHelper.ParseUri(path);
+            node.ReaderType = type;
+            node.Version = version;
+
+            using (AbstractReader reader = ReaderTypeHelper.GetReader(type, node.Path))
+            {
+                reader.Open();
+                XmlConfigParser parser = new XmlConfigParser();
+                parser.Parse(node.ConfigName, reader, node.Version, settings);
+                Configuration config = parser.GetConfiguration();
+                node.Reference = config;
+                node.Node = config.RootConfigNode;
+                node.UpdateConfiguration(configuration);
+            }
+            parent.AddChildNode(node);
         }
 
         /// <summary>
@@ -306,27 +525,27 @@ namespace LibZConfig.Common.Config.Parsers
             if (elem.HasAttributes)
             {
                 ConfigurationHeader header = new ConfigurationHeader();
-                string attr = elem.GetAttribute(XML_CONFIG_HEADER_ATTR_GROUP);
+                string attr = elem.GetAttribute(ConstXmlConfigHeader.XML_CONFIG_HEADER_ATTR_GROUP);
                 if (!String.IsNullOrWhiteSpace(attr))
                 {
                     header.ApplicationGroup = attr;
                 }
-                attr = elem.GetAttribute(XML_CONFIG_HEADER_ATTR_ID);
+                attr = elem.GetAttribute(ConstXmlConfigHeader.XML_CONFIG_HEADER_ATTR_ID);
                 if (!String.IsNullOrWhiteSpace(attr))
                 {
                     header.Id = attr;
                 }
-                attr = elem.GetAttribute(XML_CONFIG_HEADER_ATTR_APP);
+                attr = elem.GetAttribute(ConstXmlConfigHeader.XML_CONFIG_HEADER_ATTR_APP);
                 if (!String.IsNullOrWhiteSpace(attr))
                 {
                     header.Application = attr;
                 }
-                attr = elem.GetAttribute(XML_CONFIG_HEADER_ATTR_NAME);
+                attr = elem.GetAttribute(ConstXmlConfigHeader.XML_CONFIG_HEADER_ATTR_NAME);
                 if (!String.IsNullOrWhiteSpace(attr))
                 {
                     header.Name = attr;
                 }
-                attr = elem.GetAttribute(XML_CONFIG_HEADER_ATTR_VERSION);
+                attr = elem.GetAttribute(ConstXmlConfigHeader.XML_CONFIG_HEADER_ATTR_VERSION);
                 if (!String.IsNullOrWhiteSpace(attr))
                 {
                     Version ver = Version.Parse(attr);
@@ -336,21 +555,17 @@ namespace LibZConfig.Common.Config.Parsers
                     }
                     header.Version = ver;
                 }
-                if (IsTextNode(elem))
-                {
-                    header.Description = elem.InnerText;
-                }
                 if (name != header.Name)
                 {
                     throw new ConfigurationException(String.Format("Invalid Configuration: Name mis-match. [expected={0}][actual={1}]", name, header.Name));
                 }
                 if (elem.HasChildNodes)
                 {
-                    foreach(XmlNode node in elem.ChildNodes)
+                    foreach (XmlNode node in elem.ChildNodes)
                     {
                         if (node.NodeType == XmlNodeType.Element)
                         {
-                            if (node.Name == XML_CONFIG_HEADER_CREATED_BY)
+                            if (node.Name == ConstXmlConfigHeader.XML_CONFIG_HEADER_CREATED_BY)
                             {
                                 ModifiedBy mb = ParseModifiedBy((XmlElement)node);
                                 if (mb != null)
@@ -358,12 +573,19 @@ namespace LibZConfig.Common.Config.Parsers
                                     header.CreatedBy = mb;
                                 }
                             }
-                            else if (node.Name == XML_CONFIG_HEADER_UPDATED_BY)
+                            else if (node.Name == ConstXmlConfigHeader.XML_CONFIG_HEADER_UPDATED_BY)
                             {
                                 ModifiedBy mb = ParseModifiedBy((XmlElement)node);
                                 if (mb != null)
                                 {
                                     header.ModifiedBy = mb;
+                                }
+                            }
+                            else if (IsTextNode((XmlElement)node))
+                            {
+                                if (node.Name == ConstXmlConfigHeader.XML_CONFIG_HEADER_DESC)
+                                {
+                                    header.Description = node.InnerText;
                                 }
                             }
                         }
@@ -388,12 +610,12 @@ namespace LibZConfig.Common.Config.Parsers
             if (elem.HasAttributes)
             {
                 ModifiedBy mb = new ModifiedBy();
-                XmlAttribute attr = elem.Attributes[XML_CONFIG_HEADER_MB_ATTR_USER];
+                XmlAttribute attr = elem.Attributes[ConstXmlConfigHeader.XML_CONFIG_HEADER_MB_ATTR_USER];
                 if (attr != null)
                 {
                     mb.User = attr.Value;
                 }
-                attr = elem.Attributes[XML_CONFIG_HEADER_MB_ATTR_TIME];
+                attr = elem.Attributes[ConstXmlConfigHeader.XML_CONFIG_HEADER_MB_ATTR_TIME];
                 if (attr != null)
                 {
                     string ts = attr.Value;

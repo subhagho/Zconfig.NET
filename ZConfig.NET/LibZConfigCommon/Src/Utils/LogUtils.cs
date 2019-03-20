@@ -31,7 +31,7 @@ namespace LibZConfig.Common.Utils
             __LOG.Error(exception.Message);
             if (__LOG.IsDebugEnabled)
             {
-                __LOG.Debug(GetStackTrace(exception));
+               GetStackTrace(exception);
             }
         }
 
@@ -40,15 +40,15 @@ namespace LibZConfig.Common.Utils
         /// </summary>
         /// <param name="exception">Exception instance</param>
         /// <returns>Stacktrace as String</returns>
-        private static string GetStackTrace(Exception exception)
+        private static void GetStackTrace(Exception exception)
         {
             StringBuilder builder = new StringBuilder();
             Exception err = exception;
             while (err != null)
             {
-                builder.Append(String.Format("{0}BEGIN EXCEPTION{0}", new string('*', 12))).Append("\n");
-                builder.Append(err.ToString()).Append("\n");
-                builder.Append(String.Format("{0}END EXCEPTION{0}", new string('*', 13))).Append("\n");
+                __LOG.Debug(String.Format("{0}BEGIN EXCEPTION{0}", new string('*', 12)));
+                __LOG.Debug(err.ToString());
+                __LOG.Debug(String.Format("{0}END EXCEPTION{0}", new string('*', 13)));
                 if (err.InnerException != null)
                 {
                     err = err.InnerException;
@@ -58,7 +58,6 @@ namespace LibZConfig.Common.Utils
                     break;
                 }
             }
-            return builder.ToString();
         }
 
         /// <summary>
@@ -80,7 +79,7 @@ namespace LibZConfig.Common.Utils
             __LOG.Warn(exception.Message);
             if (__LOG.IsDebugEnabled)
             {
-                __LOG.Debug(GetStackTrace(exception));
+                GetStackTrace(exception);
             }
         }
 

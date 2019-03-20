@@ -23,16 +23,10 @@
   ~
   -->
 <root>
-    <header id="UNIQUE-99918239013" group="TEST-APP-GROUP" application="TEST-APPLICATION" name="test-config" version="0.2">
+    <header ID="UNIQUE-99918239013" group="TEST-APP-GROUP" application="TEST-APPLICATION" name="test-config" version="0.2">
         <description>This is a test JSON configuration file.</description>
-        <createdBy>
-            <user>subho</user>
-            <timestamp>1552835141000</timestamp>
-        </createdBy>
-        <updatedBy>
-            <user>subho</user>
-            <timestamp>1552835141000</timestamp>
-        </updatedBy>
+        <createdBy user="subho" timestamp="1552835141000" />
+        <updatedBy user="subho" timestamp="1552835151000" />
     </header>
     <configuration>
         <nodeVersion>2</nodeVersion>
@@ -193,7 +187,7 @@
                             <TEST_LONG_LIST>-134981490134</TEST_LONG_LIST>
                         </LONG_VALUE_LIST>
                     </node_4>
-                    <remoteResource type="FILE" resourceName="LICENSE.txt">
+                    <remoteResource type="FILE" resourceName="data/LICENSE.txt">
                         <url>https://raw.githubusercontent.com/subhagho/zconfig/master/LICENSE</url>
                     </remoteResource>
                 </node_3>

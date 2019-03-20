@@ -142,7 +142,7 @@ namespace LibZConfig.Common.Config.Nodes
         /// </summary>
         public ConfigResourceFile() : base()
         {
-           
+
         }
 
         /// <summary>
@@ -152,19 +152,7 @@ namespace LibZConfig.Common.Config.Nodes
         /// <param name="parent">Parent node.</param>
         public ConfigResourceFile(Configuration configuration, AbstractConfigNode parent) : base(configuration, parent)
         {
-            
-        }
 
-        /// <summary>
-        /// Method to validate the node instance.
-        /// </summary>
-        public override void Validate()
-        {
-            base.Validate();
-            if (File == null)
-            {
-                throw ConfigurationException.PropertyMissingException(nameof(File));
-            }
         }
     }
 
@@ -194,18 +182,6 @@ namespace LibZConfig.Common.Config.Nodes
         public ConfigDirectoryResource(Configuration configuration, AbstractConfigNode parent) : base(configuration, parent)
         {
 
-        }
-
-        /// <summary>
-        /// Method to validate the node instance.
-        /// </summary>
-        public override void Validate()
-        {
-            base.Validate();
-            if (Directory == null)
-            {
-                throw ConfigurationException.PropertyMissingException(nameof(File));
-            }
         }
     }
 

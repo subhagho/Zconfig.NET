@@ -24,7 +24,7 @@
   -->
 
 <root>
-  <header id="UNIQUE-99918239015" group="TEST-APP-GROUP" application="TEST-APPLICATION" name="test-config-included" version="0.2">
+  <header ID="UNIQUE-99918239015" group="TEST-APP-GROUP" application="TEST-APPLICATION" name="test-config-included" version="0.2">
     <description>This is a test JSON configuration file.</description>
     <createdBy>
       <user>subho</user>

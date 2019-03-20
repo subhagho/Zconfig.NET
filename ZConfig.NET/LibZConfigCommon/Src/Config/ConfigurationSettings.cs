@@ -89,7 +89,7 @@ namespace LibZConfig.Common.Config
         }
 
         /// <summary>
-        /// Return an path to the temporary directory with the sub-directory is specified.
+        /// Return an path to the temporary directory with appended sub-directory if specified.
         /// Will create the path if required.
         /// </summary>
         /// <param name="subdir">Sub-directory path</param>
@@ -108,6 +108,16 @@ namespace LibZConfig.Common.Config
                 di.Create();
             } 
             return di.FullName;
+        }
+
+        /// <summary>
+        /// Return an path to the temporary directory.
+        /// Will create the path if required.
+        /// </summary>
+        /// <returns>Temporary directory path</returns>
+        public string GetTempDirectory()
+        {
+            return GetTempDirectory(null);
         }
     }
 }
