@@ -92,6 +92,60 @@ namespace LibZConfig.Common.Config.Nodes
         }
 
         /// <summary>
+        /// Get the defined properties for this node, if any.
+        /// </summary>
+        /// <returns>Config Properties</returns>
+        public ConfigPropertiesNode GetProperties()
+        {
+            string name = Configuration.Settings.PropertiesNodeName;
+            if (children.ContainsKey(name))
+            {
+                AbstractConfigNode node = children[name];
+                if (node.GetType() == typeof(ConfigPropertiesNode))
+                {
+                    return (ConfigPropertiesNode)node;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Get the defined parameters for this node, if any.
+        /// </summary>
+        /// <returns>Config Parameters</returns>
+        public ConfigParametersNode GetParameters()
+        {
+            string name = Configuration.Settings.ParametersNodeName;
+            if (children.ContainsKey(name))
+            {
+                AbstractConfigNode node = children[name];
+                if (node.GetType() == typeof(ConfigParametersNode))
+                {
+                    return (ConfigParametersNode)node;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Get the defined attributes for this node, if any.
+        /// </summary>
+        /// <returns>Config Attributes</returns>
+        public ConfigAttributesNode GetAttributes()
+        {
+            string name = Configuration.Settings.AttributesNodeName;
+            if (children.ContainsKey(name))
+            {
+                AbstractConfigNode node = children[name];
+                if (node.GetType() == typeof(ConfigAttributesNode))
+                {
+                    return (ConfigAttributesNode)node;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Check if this node has any children.
         /// </summary>
         /// <returns>Is Empty?</returns>
@@ -129,12 +183,16 @@ namespace LibZConfig.Common.Config.Nodes
                     }
                     return FindChild(path, index);
                 }
+                else if (index == 0)
+                {
+                    return FindChild(path, index - 1);
+                }
             }
             else
             {
                 if (resolved.Name == Name)
                 {
-                    if (String.IsNullOrWhiteSpace(resolved.Abbreviation))
+                    if (!String.IsNullOrWhiteSpace(resolved.Abbreviation))
                     {
                         if (children.ContainsKey(resolved.Abbreviation))
                         {
@@ -142,7 +200,7 @@ namespace LibZConfig.Common.Config.Nodes
                             if (typeof(ConfigKeyValueNode).IsAssignableFrom(child.GetType()))
                             {
                                 ConfigKeyValueNode kv = (ConfigKeyValueNode)child;
-                                if (index == (path.Count - 2))
+                                if (index == (path.Count - 1))
                                 {
                                     if (String.IsNullOrWhiteSpace(resolved.ChildName))
                                     {

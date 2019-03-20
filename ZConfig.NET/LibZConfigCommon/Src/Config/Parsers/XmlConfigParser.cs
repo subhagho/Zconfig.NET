@@ -140,8 +140,8 @@ namespace LibZConfig.Common.Config.Parsers
                 XmlElement root = doc.DocumentElement;
                 ParseRootNode(name, version, root);
 
-                configuration.Validate();
-                configuration.PostLoad();
+                PostLoad();
+
                 LogUtils.Debug(String.Format("Configuration Loaded: [name={0}]", configuration.Header.Name), configuration);
             }
             catch (Exception ex)
@@ -442,7 +442,7 @@ namespace LibZConfig.Common.Config.Parsers
             {
                 throw ConfigurationException.PropertyMissingException(ConstXmlConfigIncludeNode.XML_CONFIG_INCLUDE_TYPE);
             }
-            EUriScheme type = Enum.Parse<EUriScheme>(st);
+            EUriScheme type = EUriScheme.none.ParseScheme(st);
             if (type == EUriScheme.none)
             {
                 throw ConfigurationException.PropertyMissingException(ConstXmlConfigIncludeNode.XML_CONFIG_INCLUDE_TYPE);

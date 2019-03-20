@@ -115,7 +115,11 @@ namespace LibZConfig.Common.Utils
             }
             else
             {
-                string json = JsonConvert.SerializeObject(data);
+                JsonSerializerSettings settings = new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.All
+                };
+                string json = JsonConvert.SerializeObject(data, settings);
                 string mesg = String.Format("[message={0}] {1}", message, json);
                 __LOG.Trace(mesg);
             }

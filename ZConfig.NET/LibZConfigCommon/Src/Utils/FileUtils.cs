@@ -259,5 +259,18 @@ namespace LibZConfig.Common.Utils
             }
             return null;
         }
+
+        /// <summary>
+        /// Parse the input string as the URI scheme enum.
+        /// 
+        /// </summary>
+        /// <param name="type">URI Scheme Enum</param>
+        /// <param name="value">String input</param>
+        /// <returns>URI Scheme Enum</returns>
+        public static EUriScheme ParseScheme(this EUriScheme type, string value)
+        {
+            value = value.ToLower();
+            return Enum.Parse<EUriScheme>(value);
+        }
     }
 }
