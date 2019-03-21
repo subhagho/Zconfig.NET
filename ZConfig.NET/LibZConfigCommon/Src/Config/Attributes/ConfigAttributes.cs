@@ -14,12 +14,21 @@ namespace LibZConfig.Common.Config.Attributes
         /// <summary>
         /// Search Path to find the configuration node.
         /// </summary>
-        public string path { get; set; }
+        public string Path { get; set; }
 
         /// <summary>
         /// Is the search mandatory?
         /// </summary>
-        public bool required { get; set; }
+        public bool Required { get; set; }
+
+        /// <summary>
+        /// Default empty constructor.
+        /// </summary>
+        public ConfigPath()
+        {
+            Path = null;
+            Required = true;
+        }
     }
 
     /// <summary>
@@ -32,26 +41,32 @@ namespace LibZConfig.Common.Config.Attributes
         /// <summary>
         /// Name of the node, if null will use the Field/Property name.
         /// </summary>
-        public string name { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// Is the value mandatory?
         /// </summary>
-        public bool required { get; set; }
+        public bool Required { get; set; }
 
         /// <summary>
         /// Transformer to handle the type conversion if required.
         /// </summary>
-        public Type transformer { get; set; }
+        public Type Function { get; set; }
+
+        /// <summary>
+        /// Search Path to find the configuration node.
+        /// </summary>
+        public string Path { get; set; }
 
         /// <summary>
         /// Default empty constructor.
         /// </summary>
         public ConfigValue()
         {
-            name = null;
-            required = true;
-            transformer = null;
+            Name = null;
+            Required = true;
+            Function = null;
+            Path = null;
         }
     }
 
@@ -65,26 +80,32 @@ namespace LibZConfig.Common.Config.Attributes
         /// <summary>
         /// Name of the node, if null will use the Field/Property name.
         /// </summary>
-        public string name { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// Is the value mandatory?
         /// </summary>
-        public bool required { get; set; }
+        public bool Required { get; set; }
 
         /// <summary>
         /// Transformer to handle the type conversion if required.
         /// </summary>
-        public Type transformer { get; set; }
+        public Type Function { get; set; }
+
+        /// <summary>
+        /// Search Path to find the configuration node.
+        /// </summary>
+        public string Path { get; set; }
 
         /// <summary>
         /// Default empty constructor.
         /// </summary>
         public ConfigAttribute()
         {
-            name = null;
-            required = true;
-            transformer = null;
+            Name = null;
+            Required = true;
+            Function = null;
+            Path = null;
         }
     }
 
@@ -92,32 +113,54 @@ namespace LibZConfig.Common.Config.Attributes
     /// Annotation to be used to define configuration mapping for auto-wired configuration elements.
     /// Annotation reads values from config parameter elements.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Parameter, Inherited = true)]
     public class ConfigParam : Attribute
     {
         /// <summary>
         /// Name of the node, if null will use the Field/Property name.
         /// </summary>
-        public string name { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// Is the value mandatory?
         /// </summary>
-        public bool required { get; set; }
+        public bool Required { get; set; }
 
         /// <summary>
         /// Transformer to handle the type conversion if required.
         /// </summary>
-        public Type transformer { get; set; }
+        public Type Function { get; set; }
+        /// <summary>
+        /// Search Path to find the configuration node.
+        /// </summary>
+        public string Path { get; set; }
 
         /// <summary>
         /// Default empty constructor.
         /// </summary>
         public ConfigParam()
         {
-            name = null;
-            required = true;
-            transformer = null;
+            Name = null;
+            Required = true;
+            Function = null;
+            Path = null;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor, Inherited = true)]
+    public class MethodInvoke : Attribute
+    {
+        /// <summary>
+        /// Search Path to find the configuration node.
+        /// </summary>
+        public string Path { get; set; }
+
+        /// <summary>
+        /// Default empty constructor.
+        /// </summary>
+        public MethodInvoke()
+        {
+            Path = String.Empty;
         }
     }
 }

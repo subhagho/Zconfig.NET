@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Globalization;
 using LibZConfig.Common.Utils;
 
 namespace LibZConfig.Common.Config.Attributes
@@ -69,6 +70,29 @@ namespace LibZConfig.Common.Config.Attributes
     public interface IStringValueTransformer<T> : IValueTransformer<string, T>
     {
 
+    }
+
+    public class StringToDateTransformer : IStringValueTransformer<DateTime>
+    {
+        private const string DEFAULT_DATETIME_FORMAT = "MM.dd.yyyy HH:mm:ss";
+
+        public string Reverse(DateTime data)
+        {
+            if (data != null)
+            {
+                return data.ToString(DEFAULT_DATETIME_FORMAT);
+            }
+            return null;
+        }
+
+        public DateTime Transform(string data)
+        {
+            if (!String.IsNullOrWhiteSpace(data))
+            {
+                return DateTime.ParseExact(data, DEFAULT_DATETIME_FORMAT, CultureInfo.CurrentCulture);
+            }
+            return default(DateTime);
+        }
     }
 
     /// <summary>

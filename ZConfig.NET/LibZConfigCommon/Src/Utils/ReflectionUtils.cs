@@ -304,5 +304,280 @@ namespace LibZConfig.Common.Utils
             }
             return null;
         }
+
+        /// <summary>
+        /// Convert to a list of primitive type from String.
+        /// </summary>
+        /// <param name="type">Target type</param>
+        /// <param name="values">List of Input string value</param>
+        /// <returns>Converted list value</returns>
+        public static object ConvertListFromStrings(Type type, List<string> values)
+        {
+            if (type.IsPrimitive)
+            {
+                if (type == typeof(Boolean) || type == typeof(bool))
+                {
+                    List<bool> list = new List<bool>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(Boolean.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(Byte) || type == typeof(byte))
+                {
+                    List<byte> list = new List<byte>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(Byte.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(Char) || type == typeof(char))
+                {
+                    List<char> list = new List<char>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(Char.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(SByte) || type == typeof(sbyte))
+                {
+                    List<sbyte> list = new List<sbyte>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(SByte.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(Decimal) || type == typeof(decimal))
+                {
+                    List<decimal> list = new List<decimal>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(Decimal.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(Double) || type == typeof(double))
+                {
+                    List<double> list = new List<double>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(Double.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(float) || type == typeof(Single))
+                {
+                    List<float> list = new List<float>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(Single.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(int) || type == typeof(Int32))
+                {
+                    List<int> list = new List<int>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(Int32.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(uint) || type == typeof(UInt32))
+                {
+                    List<uint> list = new List<uint>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(UInt32.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(long) || type == typeof(Int64))
+                {
+                    List<long> list = new List<long>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(Int64.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(ulong) || type == typeof(UInt64))
+                {
+                    List<ulong> list = new List<ulong>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(UInt64.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(short) || type == typeof(Int16))
+                {
+                    List<short> list = new List<short>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(Int16.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(ushort) || type == typeof(UInt16))
+                {
+                    List<ushort> list = new List<ushort>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(UInt16.Parse(value));
+                    }
+                    return list;
+                }
+            }
+            else if (type == typeof(string) || type == typeof(String))
+            {
+                return values;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Convert to a Set of primitive type from String.
+        /// </summary>
+        /// <param name="type">Target type</param>
+        /// <param name="values">List of Input string value</param>
+        /// <returns>Converted list value</returns>
+        public static object ConvertSetFromStrings(Type type, List<string> values)
+        {
+            if (type.IsPrimitive)
+            {
+                if (type == typeof(Boolean) || type == typeof(bool))
+                {
+                    HashSet<bool> list = new HashSet<bool>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(Boolean.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(Byte) || type == typeof(byte))
+                {
+                    HashSet<byte> list = new HashSet<byte>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(Byte.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(Char) || type == typeof(char))
+                {
+                    HashSet<char> list = new HashSet<char>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(Char.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(SByte) || type == typeof(sbyte))
+                {
+                    HashSet<sbyte> list = new HashSet<sbyte>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(SByte.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(Decimal) || type == typeof(decimal))
+                {
+                    HashSet<decimal> list = new HashSet<decimal>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(Decimal.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(Double) || type == typeof(double))
+                {
+                    HashSet<double> list = new HashSet<double>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(Double.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(float) || type == typeof(Single))
+                {
+                    HashSet<float> list = new HashSet<float>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(Single.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(int) || type == typeof(Int32))
+                {
+                    HashSet<int> list = new HashSet<int>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(Int32.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(uint) || type == typeof(UInt32))
+                {
+                    HashSet<uint> list = new HashSet<uint>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(UInt32.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(long) || type == typeof(Int64))
+                {
+                    HashSet<long> list = new HashSet<long>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(Int64.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(ulong) || type == typeof(UInt64))
+                {
+                    HashSet<ulong> list = new HashSet<ulong>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(UInt64.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(short) || type == typeof(Int16))
+                {
+                    HashSet<short> list = new HashSet<short>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(Int16.Parse(value));
+                    }
+                    return list;
+                }
+                else if (type == typeof(ushort) || type == typeof(UInt16))
+                {
+                    HashSet<ushort> list = new HashSet<ushort>(values.Count);
+                    foreach (string value in values)
+                    {
+                        list.Add(UInt16.Parse(value));
+                    }
+                    return list;
+                }
+            }
+            else if (type == typeof(string) || type == typeof(String))
+            {
+                HashSet<string> list = new HashSet<string>(values.Count);
+                foreach (string value in values)
+                {
+                    list.Add(value);
+                }
+                return list;
+            }
+            return null;
+        }
     }
 }
