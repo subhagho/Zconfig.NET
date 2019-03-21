@@ -50,8 +50,19 @@ namespace LibZConfig.Common.Config
         }
     }
 
+    /// <summary>
+    /// Annotation processor class: Reads the defined Attribute annotations for a type and
+    /// sets the values based on the passed configuration.
+    /// </summary>
     public static class ConfigurationAnnotationProcessor
     {
+        /// <summary>
+        /// Set the target instance values reading from the passed configuration.
+        /// </summary>
+        /// <typeparam name="T">Target Instance type</typeparam>
+        /// <param name="configuration">Configuration instance</param>
+        /// <param name="target">Target Type instance</param>
+        /// <returns>Updated Target Type instance</returns>
         public static T Process<T>(Configuration configuration, T target)
         {
             Contract.Requires(configuration != null);
@@ -76,6 +87,13 @@ namespace LibZConfig.Common.Config
             return target;
         }
 
+        /// <summary>
+        /// Set the target instance values reading from the passed configuration node.
+        /// </summary>
+        /// <typeparam name="T">Target Instance type</typeparam>
+        /// <param name="parent">Configuration node instance</param>
+        /// <param name="target">Target Type instance</param>
+        /// <returns>Updated Target Type instance</returns>
         public static T Process<T>(AbstractConfigNode parent, T target)
         {
             Contract.Requires(parent != null);
@@ -100,6 +118,14 @@ namespace LibZConfig.Common.Config
             return target;
         }
 
+        /// <summary>
+        /// Read the configuration values from the passed node and
+        /// update the target instance.
+        /// </summary>
+        /// <typeparam name="T">Target Instance type</typeparam>
+        /// <param name="node">Configuration Node to read values from</param>
+        /// <param name="target">Target Type instance</param>
+        /// <returns>Updated Target Type instance</returns>
         private static T ReadValues<T>(ConfigPathNode node, T target)
         {
             Type type = target.GetType();
@@ -150,6 +176,15 @@ namespace LibZConfig.Common.Config
             return target;
         }
 
+        /// <summary>
+        /// Process the annotated property and set the values from the configuration parameters.
+        /// </summary>
+        /// <typeparam name="T">Target Instance type</typeparam>
+        /// <param name="node">Configuration Node</param>
+        /// <param name="target">Target Type instance.</param>
+        /// <param name="property">Property to update</param>
+        /// <param name="param">Config param annotation</param>
+        /// <returns>Updated Target Type instance.</returns>
         private static T ProcessProperty<T>(ConfigPathNode node, T target, PropertyInfo property, ConfigParam param)
         {
             string pname = param.name;
@@ -170,8 +205,18 @@ namespace LibZConfig.Common.Config
                     object v = null;
                     if (param.transformer != null)
                     {
-
+                        v = TransformerHelper.Transform(param.transformer, value);
                     }
+                    else
+                    {
+                        v = ReflectionUtils.ConvertFromString(property.PropertyType, value);
+                    }
+                    if (v == null && param.required)
+                    {
+                        throw AnnotationProcessorException.Throw(target.GetType(), pname);
+                    }
+                    if (v != null)
+                        property.SetValue(target, v);
                 }
                 else if (param.required)
                 {
@@ -180,27 +225,256 @@ namespace LibZConfig.Common.Config
             }
             return target;
         }
+        /// <summary>
+        /// Process the annotated property and set the values from the configuration attributes.
+        /// </summary>
+        /// <typeparam name="T">Target Instance type</typeparam>
+        /// <param name="node">Configuration Node</param>
+        /// <param name="target">Target Type instance.</param>
+        /// <param name="property">Property to update</param>
+        /// <param name="attr">Config attribute annotation</param>
+        /// <returns>Updated Target Type instance.</returns>
+
         private static T ProcessProperty<T>(ConfigPathNode node, T target, PropertyInfo property, ConfigAttribute attr)
         {
+            string pname = attr.name;
+            if (!String.IsNullOrWhiteSpace(pname))
+            {
+                string value = null;
+                ConfigAttributesNode pnode = node.GetAttributes();
+                if (pnode != null)
+                {
+                    ConfigValueNode vn = pnode.GetValue(pname);
+                    if (vn != null)
+                    {
+                        value = vn.GetValue();
+                    }
+                }
+                if (!String.IsNullOrWhiteSpace(value))
+                {
+                    object v = null;
+                    if (attr.transformer != null)
+                    {
+                        v = TransformerHelper.Transform(attr.transformer, value);
+                    }
+                    else
+                    {
+                        v = ReflectionUtils.ConvertFromString(property.PropertyType, value);
+                    }
+                    if (v == null && attr.required)
+                    {
+                        throw AnnotationProcessorException.Throw(target.GetType(), pname);
+                    }
+                    if (v != null)
+                        property.SetValue(target, v);
+                }
+                else if (attr.required)
+                {
+                    throw AnnotationProcessorException.Throw(target.GetType(), pname);
+                }
+            }
             return target;
         }
 
-        private static T ProcessProperty<T>(ConfigPathNode node, T target, PropertyInfo property, ConfigValue value)
+        /// <summary>
+        /// Process the annotated property and set the values from the configuration value.
+        /// </summary>
+        /// <typeparam name="T">Target Instance type</typeparam>
+        /// <param name="node">Configuration Node</param>
+        /// <param name="target">Target Type instance.</param>
+        /// <param name="property">Property to update</param>
+        /// <param name="configValue">Config value annotation</param>
+        /// <returns>Updated Target Type instance.</returns>
+        private static T ProcessProperty<T>(ConfigPathNode node, T target, PropertyInfo property, ConfigValue configValue)
         {
+            string pname = configValue.name;
+            if (!String.IsNullOrWhiteSpace(pname))
+            {
+                string value = null;
+
+                AbstractConfigNode cnode = node.GetChildNode(pname);
+                if (cnode.GetType() == typeof(ConfigValueNode))
+                {
+                    ConfigValueNode vn = (ConfigValueNode)cnode;
+                    if (vn != null)
+                    {
+                        value = vn.GetValue();
+                    }
+                }
+                if (!String.IsNullOrWhiteSpace(value))
+                {
+                    object v = null;
+                    if (configValue.transformer != null)
+                    {
+                        v = TransformerHelper.Transform(configValue.transformer, value);
+                    }
+                    else
+                    {
+                        v = ReflectionUtils.ConvertFromString(property.PropertyType, value);
+                    }
+                    if (v == null && configValue.required)
+                    {
+                        throw AnnotationProcessorException.Throw(target.GetType(), pname);
+                    }
+                    if (v != null)
+                        property.SetValue(target, v);
+                }
+                else if (configValue.required)
+                {
+                    throw AnnotationProcessorException.Throw(target.GetType(), pname);
+                }
+            }
             return target;
         }
 
-        private static T ProcessField<T>(ConfigPathNode node, T target, FieldInfo property, ConfigParam param)
+        /// <summary>
+        /// Process the annotated field and set the values from the configuration parameters.
+        /// </summary>
+        /// <typeparam name="T">Target Instance type</typeparam>
+        /// <param name="node">Configuration Node</param>
+        /// <param name="target">Target Type instance.</param>
+        /// <param name="field">Property to update</param>
+        /// <param name="param">Config param annotation</param>
+        /// <returns>Updated Target Type instance.</returns>
+        private static T ProcessField<T>(ConfigPathNode node, T target, FieldInfo field, ConfigParam param)
         {
-            return target;
-        }
-        private static T ProcessField<T>(ConfigPathNode node, T target, FieldInfo property, ConfigAttribute attr)
-        {
+            string pname = param.name;
+            if (!String.IsNullOrWhiteSpace(pname))
+            {
+                string value = null;
+                ConfigParametersNode pnode = node.GetParameters();
+                if (pnode != null)
+                {
+                    ConfigValueNode vn = pnode.GetValue(pname);
+                    if (vn != null)
+                    {
+                        value = vn.GetValue();
+                    }
+                }
+                if (!String.IsNullOrWhiteSpace(value))
+                {
+                    object v = null;
+                    if (param.transformer != null)
+                    {
+                        v = TransformerHelper.Transform(param.transformer, value);
+                    }
+                    else
+                    {
+                        v = ReflectionUtils.ConvertFromString(field.FieldType, value);
+                    }
+                    if (v == null && param.required)
+                    {
+                        throw AnnotationProcessorException.Throw(target.GetType(), pname);
+                    }
+                    if (v != null)
+                        TypeUtils.CallSetter(field, target, v);
+                }
+                else if (param.required)
+                {
+                    throw AnnotationProcessorException.Throw(target.GetType(), pname);
+                }
+            }
             return target;
         }
 
-        private static T ProcessField<T>(ConfigPathNode node, T target, FieldInfo property, ConfigValue value)
+        /// <summary>
+        /// Process the annotated field and set the values from the configuration attributes.
+        /// </summary>
+        /// <typeparam name="T">Target Instance type</typeparam>
+        /// <param name="node">Configuration Node</param>
+        /// <param name="target">Target Type instance.</param>
+        /// <param name="field">Property to update</param>
+        /// <param name="attr">Config attribute annotation</param>
+        /// <returns>Updated Target Type instance.</returns>
+        private static T ProcessField<T>(ConfigPathNode node, T target, FieldInfo field, ConfigAttribute attr)
         {
+            string pname = attr.name;
+            if (!String.IsNullOrWhiteSpace(pname))
+            {
+                string value = null;
+                ConfigAttributesNode pnode = node.GetAttributes();
+                if (pnode != null)
+                {
+                    ConfigValueNode vn = pnode.GetValue(pname);
+                    if (vn != null)
+                    {
+                        value = vn.GetValue();
+                    }
+                }
+                if (!String.IsNullOrWhiteSpace(value))
+                {
+                    object v = null;
+                    if (attr.transformer != null)
+                    {
+                        v = TransformerHelper.Transform(attr.transformer, value);
+                    }
+                    else
+                    {
+                        v = ReflectionUtils.ConvertFromString(field.FieldType, value);
+                    }
+                    if (v == null && attr.required)
+                    {
+                        throw AnnotationProcessorException.Throw(target.GetType(), pname);
+                    }
+                    if (v != null)
+                        TypeUtils.CallSetter(field, target, v);
+                }
+                else if (attr.required)
+                {
+                    throw AnnotationProcessorException.Throw(target.GetType(), pname);
+                }
+            }
+            return target;
+        }
+
+        /// <summary>
+        /// Process the annotated field and set the values from the configuration value.
+        /// </summary>
+        /// <typeparam name="T">Target Instance type</typeparam>
+        /// <param name="node">Configuration Node</param>
+        /// <param name="target">Target Type instance.</param>
+        /// <param name="field">Property to update</param>
+        /// <param name="configValue">Config value annotation</param>
+        /// <returns>Updated Target Type instance.</returns>
+        private static T ProcessField<T>(ConfigPathNode node, T target, FieldInfo field, ConfigValue configValue)
+        {
+            string pname = configValue.name;
+            if (!String.IsNullOrWhiteSpace(pname))
+            {
+                string value = null;
+
+                AbstractConfigNode cnode = node.GetChildNode(pname);
+                if (cnode.GetType() == typeof(ConfigValueNode))
+                {
+                    ConfigValueNode vn = (ConfigValueNode)cnode;
+                    if (vn != null)
+                    {
+                        value = vn.GetValue();
+                    }
+                }
+                if (!String.IsNullOrWhiteSpace(value))
+                {
+                    object v = null;
+                    if (configValue.transformer != null)
+                    {
+                        v = TransformerHelper.Transform(configValue.transformer, value);
+                    }
+                    else
+                    {
+                        v = ReflectionUtils.ConvertFromString(field.FieldType, value);
+                    }
+                    if (v == null && configValue.required)
+                    {
+                        throw AnnotationProcessorException.Throw(target.GetType(), pname);
+                    }
+                    if (v != null)
+                        TypeUtils.CallSetter(field, target, v);
+                }
+                else if (configValue.required)
+                {
+                    throw AnnotationProcessorException.Throw(target.GetType(), pname);
+                }
+            }
             return target;
         }
     }

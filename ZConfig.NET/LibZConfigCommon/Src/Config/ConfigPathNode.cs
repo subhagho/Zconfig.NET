@@ -230,12 +230,35 @@ namespace LibZConfig.Common.Config.Nodes
             string name = path[index + 1];
             if (name.Length == 1 && name[0] == ConfigurationSettings.NODE_SEARCH_WILDCARD)
             {
+                if (index == (path.Count - 2))
+                {
+                    if (children.Count > 0)
+                    {
+                        List<AbstractConfigNode> nodes = new List<AbstractConfigNode>();
+                        foreach (string key in children.Keys)
+                        {
+                            nodes.Add(children[key]);
+                        }
+                        if (nodes.Count == 1)
+                        {
+                            return nodes[0];
+                        }
+                        else if (nodes.Count > 1)
+                        {
+                            ConfigSearchResult result = new ConfigSearchResult();
+                            result.Configuration = Configuration;
+                            result.AddAll(nodes);
+                            return result;
+                        }
+                    }
+                    return null;
+                }
                 if (children.Count > 0)
                 {
                     List<AbstractConfigNode> nodes = new List<AbstractConfigNode>();
                     foreach (string key in children.Keys)
                     {
-                        AbstractConfigNode sn = children[key].Find(path, index + 1);
+                        AbstractConfigNode sn = children[key].Find(path, index + 2);
                         if (sn != null)
                         {
                             nodes.Add(sn);

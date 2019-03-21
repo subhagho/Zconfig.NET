@@ -11,7 +11,7 @@ namespace LibZConfig.Common.Utils
             try
             {
                 string value = "true";
-                bool bv = (bool)ReflectionUtils.ConvertFromString<Boolean>(value);
+                bool bv = (bool)ReflectionUtils.ConvertFromString(typeof(Boolean), value);
             }
             catch (Exception e)
             {

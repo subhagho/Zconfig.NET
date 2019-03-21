@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Reflection;
+using LibZConfig.Common.Utils;
 
 namespace LibZConfig.Common.Config.Attributes
 {
@@ -69,5 +69,61 @@ namespace LibZConfig.Common.Config.Attributes
     public interface IStringValueTransformer<T> : IValueTransformer<string, T>
     {
 
+    }
+
+    /// <summary>
+    /// Helper class to invoke the transformer methods.
+    /// </summary>
+    public static class TransformerHelper
+    {
+        /// <summary>
+        /// Call the transform method on the specified transformer type.
+        /// </summary>
+        /// <param name="transformerType">Transformer type</param>
+        /// <param name="source">Input source data</param>
+        /// <returns>Transfromed data</returns>
+        public static object Transform(Type transformerType, object source)
+        {
+            if (!ReflectionUtils.ImplementsGenericInterface(transformerType, typeof(IValueTransformer<,>)))
+            {
+                throw new TransformationException(String.Format("Invalid Tranfsormer Type: [type={0}]", transformerType.FullName));
+            }
+            object transformer = Activator.CreateInstance(transformerType);
+            if (transformer == null)
+            {
+                throw new TransformationException(String.Format("Error creating Tranfsormer instance: [type={0}]", transformerType.FullName));
+            }
+            MethodInfo method = transformerType.GetMethod("Transform");
+            if (method == null)
+            {
+                throw new TransformationException(String.Format("Error getting Transform method from instance: [type={0}]", transformerType.FullName));
+            }
+            return method.Invoke(transformer, new[] { source });
+        }
+
+        /// <summary>
+        /// Call the reverse method on the specified transformer type.
+        /// </summary>
+        /// <param name="transformerType">Transformer type</param>
+        /// <param name="source">Input source data</param>
+        /// <returns>Transfromed data</returns>
+        public static object Reverse(Type transformerType, object source)
+        {
+            if (!ReflectionUtils.ImplementsGenericInterface(transformerType, typeof(IValueTransformer<,>)))
+            {
+                throw new TransformationException(String.Format("Invalid Tranfsormer Type: [type={0}]", transformerType.FullName));
+            }
+            object transformer = Activator.CreateInstance(transformerType);
+            if (transformer == null)
+            {
+                throw new TransformationException(String.Format("Error creating Tranfsormer instance: [type={0}]", transformerType.FullName));
+            }
+            MethodInfo method = transformerType.GetMethod("Reverse");
+            if (method == null)
+            {
+                throw new TransformationException(String.Format("Error getting Reverse method from instance: [type={0}]", transformerType.FullName));
+            }
+            return method.Invoke(transformer, new[] { source });
+        }
     }
 }

@@ -182,5 +182,54 @@ namespace LibZConfig.Common.Config.Parsers
                 throw ex;
             }
         }
+
+        [Fact]
+        public void SearchWildcar()
+        {
+            try
+            {
+                Properties properties = new Properties();
+                properties.Load(CONFIG_BASIC_PROPS_FILE);
+
+                string cname = properties.GetProperty(CONFIG_PROP_NAME);
+                Assert.False(String.IsNullOrWhiteSpace(cname));
+                string cfile = properties.GetProperty(CONFIG_PROP_FILENAME);
+                Assert.False(String.IsNullOrWhiteSpace(cfile));
+                string version = properties.GetProperty(CONFIG_PROP_VERSION);
+                Assert.False(String.IsNullOrWhiteSpace(version));
+
+                LogUtils.Info(String.Format("Reading Configuration: [file={0}][version={1}]", cfile, version));
+
+                Configuration configuration = null;
+                using (FileReader reader = new FileReader(cfile))
+                {
+                    reader.Open();
+                    XmlConfigParser parser = new XmlConfigParser();
+                    ConfigurationSettings settings = new ConfigurationSettings();
+                    settings.DownloadOptions = EDownloadOptions.LoadRemoteResourcesOnStartup;
+
+                    parser.Parse(cname, reader, Version.Parse(version), settings);
+                    configuration = parser.GetConfiguration();
+                }
+                Assert.NotNull(configuration);
+                string path = "root.configuration.node_1.node_2.node_3.*";
+                AbstractConfigNode node = configuration.Find(path);
+                Assert.NotNull(node);
+                Assert.True(node.GetType() == typeof(ConfigSearchResult));
+                path = "configuration.node_1.node_2.node_3.*.LONG_VALUE_LIST";
+                node = configuration.Find(path);
+                Assert.NotNull(node);
+                Assert.True(node.GetType() == typeof(ConfigListValueNode));
+                Assert.Equal(8, ((ConfigListValueNode)node).Count());
+                Assert.Equal(path, node.Name);
+                LogUtils.Debug(node.GetAbsolutePath());
+
+            }
+            catch (Exception ex)
+            {
+                LogUtils.Error(ex);
+                throw ex;
+            }
+        }
     }
 }
