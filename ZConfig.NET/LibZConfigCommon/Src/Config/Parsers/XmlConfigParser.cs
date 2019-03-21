@@ -194,6 +194,7 @@ namespace LibZConfig.Common.Config.Parsers
         private void ParseBodyNode(string name, XmlElement elem, Stack<AbstractConfigNode> nodeStack)
         {
             bool popStack = false;
+            bool processed = false;
             AbstractConfigNode parent = nodeStack.Peek();
             if (IsTextNode(elem))
             {
@@ -242,6 +243,7 @@ namespace LibZConfig.Common.Config.Parsers
                         }
                         ConfigPathNode pnode = (ConfigPathNode)parent;
                         AddIncludeNode(pnode, elem);
+                        processed = true;
                     }
                     else if (elem.Name == ConstXmlResourceNode.XML_CONFIG_NODE_RESOURCE)
                     {
@@ -251,6 +253,7 @@ namespace LibZConfig.Common.Config.Parsers
                         }
                         ConfigPathNode pnode = (ConfigPathNode)parent;
                         AddResourceNode(pnode, elem);
+                        processed = true;
                     }
                     else if (elem.Name == settings.ParametersNodeName)
                     {
@@ -302,27 +305,30 @@ namespace LibZConfig.Common.Config.Parsers
                         popStack = true;
                     }
                 }
-                if (elem.HasAttributes)
+                if (!processed)
                 {
-                    AbstractConfigNode pp = nodeStack.Peek();
-                    if (pp.GetType() == typeof(ConfigPathNode))
+                    if (elem.HasAttributes)
                     {
-                        ConfigPathNode cp = (ConfigPathNode)pp;
-                        ConfigAttributesNode attrs = new ConfigAttributesNode(cp.Configuration, cp);
-                        cp.AddChildNode(attrs);
-                        foreach (XmlAttribute attr in elem.Attributes)
+                        AbstractConfigNode pp = nodeStack.Peek();
+                        if (pp.GetType() == typeof(ConfigPathNode))
                         {
-                            attrs.Add(attr.Name, attr.Value);
+                            ConfigPathNode cp = (ConfigPathNode)pp;
+                            ConfigAttributesNode attrs = new ConfigAttributesNode(cp.Configuration, cp);
+                            cp.AddChildNode(attrs);
+                            foreach (XmlAttribute attr in elem.Attributes)
+                            {
+                                attrs.Add(attr.Name, attr.Value);
+                            }
                         }
                     }
-                }
-                if (elem.HasChildNodes)
-                {
-                    foreach (XmlNode cnode in elem.ChildNodes)
+                    if (elem.HasChildNodes)
                     {
-                        if (cnode.NodeType == XmlNodeType.Element)
+                        foreach (XmlNode cnode in elem.ChildNodes)
                         {
-                            ParseBodyNode(cnode.Name, (XmlElement)cnode, nodeStack);
+                            if (cnode.NodeType == XmlNodeType.Element)
+                            {
+                                ParseBodyNode(cnode.Name, (XmlElement)cnode, nodeStack);
+                            }
                         }
                     }
                 }

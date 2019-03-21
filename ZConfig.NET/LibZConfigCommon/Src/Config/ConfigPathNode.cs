@@ -192,11 +192,11 @@ namespace LibZConfig.Common.Config.Nodes
             {
                 if (resolved.Name == Name)
                 {
-                    if (!String.IsNullOrWhiteSpace(resolved.Abbreviation))
+                    if (!String.IsNullOrWhiteSpace(resolved.AbbrReplacement))
                     {
-                        if (children.ContainsKey(resolved.Abbreviation))
+                        if (children.ContainsKey(resolved.AbbrReplacement))
                         {
-                            AbstractConfigNode child = children[resolved.Abbreviation];
+                            AbstractConfigNode child = children[resolved.AbbrReplacement];
                             if (typeof(ConfigKeyValueNode).IsAssignableFrom(child.GetType()))
                             {
                                 ConfigKeyValueNode kv = (ConfigKeyValueNode)child;
@@ -213,6 +213,10 @@ namespace LibZConfig.Common.Config.Nodes
                                 }
                             }
                         }
+                    }
+                    else
+                    {
+                        return FindChild(path, index);
                     }
                 }
             }
@@ -258,7 +262,7 @@ namespace LibZConfig.Common.Config.Nodes
                     List<AbstractConfigNode> nodes = new List<AbstractConfigNode>();
                     foreach (string key in children.Keys)
                     {
-                        AbstractConfigNode sn = children[key].Find(path, index + 2);
+                        AbstractConfigNode sn = children[key].Find(path, index + 1);
                         if (sn != null)
                         {
                             nodes.Add(sn);

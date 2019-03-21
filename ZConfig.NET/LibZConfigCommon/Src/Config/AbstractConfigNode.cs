@@ -224,6 +224,7 @@ namespace LibZConfig.Common.Config.Nodes
             if (parts != null && parts.Length > 0)
             {
                 List<string> pList = new List<string>(parts);
+                ConfigUtils.CheckSearchRoot(pList, Name, Configuration.Settings);
                 return Find(pList, 0);
             }
             return null;

@@ -14,6 +14,49 @@ namespace LibZConfig.Common.Config.Parsers
         private const string CONFIG_PROP_FILENAME = "config.file";
         private const string CONFIG_PROP_VERSION = "config.version";
 
+        private static Configuration configuration = null;
+
+        private Configuration ReadConfiguration()
+        {
+            if (configuration != null)
+            {
+                return configuration;
+            }
+            try
+            {
+                Properties properties = new Properties();
+                properties.Load(CONFIG_BASIC_PROPS_FILE);
+
+                string cname = properties.GetProperty(CONFIG_PROP_NAME);
+                Assert.False(String.IsNullOrWhiteSpace(cname));
+                string cfile = properties.GetProperty(CONFIG_PROP_FILENAME);
+                Assert.False(String.IsNullOrWhiteSpace(cfile));
+                string version = properties.GetProperty(CONFIG_PROP_VERSION);
+                Assert.False(String.IsNullOrWhiteSpace(version));
+
+                LogUtils.Info(String.Format("Reading Configuration: [file={0}][version={1}]", cfile, version));
+
+                using (FileReader reader = new FileReader(cfile))
+                {
+                    reader.Open();
+                    XmlConfigParser parser = new XmlConfigParser();
+                    ConfigurationSettings settings = new ConfigurationSettings();
+                    settings.DownloadOptions = EDownloadOptions.LoadRemoteResourcesOnStartup;
+
+                    parser.Parse(cname, reader, Version.Parse(version), settings);
+
+                    configuration = parser.GetConfiguration();
+
+                    return configuration;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogUtils.Error(ex);
+                throw ex;
+            }
+        }
+
         [Fact]
         public void Parse()
         {
@@ -84,29 +127,9 @@ namespace LibZConfig.Common.Config.Parsers
         {
             try
             {
-                Properties properties = new Properties();
-                properties.Load(CONFIG_BASIC_PROPS_FILE);
-
-                string cname = properties.GetProperty(CONFIG_PROP_NAME);
-                Assert.False(String.IsNullOrWhiteSpace(cname));
-                string cfile = properties.GetProperty(CONFIG_PROP_FILENAME);
-                Assert.False(String.IsNullOrWhiteSpace(cfile));
-                string version = properties.GetProperty(CONFIG_PROP_VERSION);
-                Assert.False(String.IsNullOrWhiteSpace(version));
-
-                LogUtils.Info(String.Format("Reading Configuration: [file={0}][version={1}]", cfile, version));
-
-                Configuration configuration = null;
-                using (FileReader reader = new FileReader(cfile))
-                {
-                    reader.Open();
-                    XmlConfigParser parser = new XmlConfigParser();
-                    ConfigurationSettings settings = new ConfigurationSettings();
-                    settings.DownloadOptions = EDownloadOptions.LoadRemoteResourcesOnStartup;
-
-                    parser.Parse(cname, reader, Version.Parse(version), settings);
-                    configuration = parser.GetConfiguration();
-                }
+                
+                Configuration configuration = ReadConfiguration();
+             
                 Assert.NotNull(configuration);
                 string path = "root.configuration.node_1";
                 AbstractConfigNode node = configuration.Find(path);
@@ -132,29 +155,8 @@ namespace LibZConfig.Common.Config.Parsers
         {
             try
             {
-                Properties properties = new Properties();
-                properties.Load(CONFIG_BASIC_PROPS_FILE);
+                Configuration configuration = ReadConfiguration();
 
-                string cname = properties.GetProperty(CONFIG_PROP_NAME);
-                Assert.False(String.IsNullOrWhiteSpace(cname));
-                string cfile = properties.GetProperty(CONFIG_PROP_FILENAME);
-                Assert.False(String.IsNullOrWhiteSpace(cfile));
-                string version = properties.GetProperty(CONFIG_PROP_VERSION);
-                Assert.False(String.IsNullOrWhiteSpace(version));
-
-                LogUtils.Info(String.Format("Reading Configuration: [file={0}][version={1}]", cfile, version));
-
-                Configuration configuration = null;
-                using (FileReader reader = new FileReader(cfile))
-                {
-                    reader.Open();
-                    XmlConfigParser parser = new XmlConfigParser();
-                    ConfigurationSettings settings = new ConfigurationSettings();
-                    settings.DownloadOptions = EDownloadOptions.LoadRemoteResourcesOnStartup;
-
-                    parser.Parse(cname, reader, Version.Parse(version), settings);
-                    configuration = parser.GetConfiguration();
-                }
                 Assert.NotNull(configuration);
                 String path = "root.configuration.node_1#";
                 AbstractConfigNode node = configuration.Find(path);
@@ -184,33 +186,53 @@ namespace LibZConfig.Common.Config.Parsers
         }
 
         [Fact]
+        public void SearchAttributes()
+        {
+            try
+            {
+                Configuration configuration = ReadConfiguration();
+
+                Assert.NotNull(configuration);
+                String path = "root.configuration.node_1.node_2";
+                AbstractConfigNode node = configuration.Find(path);
+                Assert.NotNull(node);
+                Assert.True(node.GetType() == typeof(ConfigPathNode));
+
+                path = "@ATTRIBUTE_2";
+                node = configuration.Find(node, path);
+                Assert.NotNull(node);
+                Assert.True(node.GetType() == typeof(ConfigValueNode));
+                String param = ((ConfigValueNode)node).GetValue();
+                Assert.False(String.IsNullOrEmpty(param));
+                LogUtils.Debug(
+                      String.Format("[path={0}] attribute value = {1}", path, param));
+
+                path = "root.configuration.node_1.node_2.node_3@ATTR_2";
+                node = configuration.Find(path);
+                Assert.NotNull(node);
+                Assert.True(node.GetType() == typeof(ConfigValueNode));
+                
+                path = "root.configuration.node_1.node_2.node_3@";
+                node = configuration.Find(path);
+                Assert.NotNull(node);
+                Assert.True(node.GetType() == typeof(ConfigAttributesNode));
+                LogUtils.Debug("NODE>>", node);
+            }
+            catch (Exception ex)
+            {
+                LogUtils.Error(ex);
+                throw ex;
+            }
+        }
+
+
+        [Fact]
         public void SearchWildcar()
         {
             try
             {
-                Properties properties = new Properties();
-                properties.Load(CONFIG_BASIC_PROPS_FILE);
+                Configuration configuration = ReadConfiguration();
 
-                string cname = properties.GetProperty(CONFIG_PROP_NAME);
-                Assert.False(String.IsNullOrWhiteSpace(cname));
-                string cfile = properties.GetProperty(CONFIG_PROP_FILENAME);
-                Assert.False(String.IsNullOrWhiteSpace(cfile));
-                string version = properties.GetProperty(CONFIG_PROP_VERSION);
-                Assert.False(String.IsNullOrWhiteSpace(version));
-
-                LogUtils.Info(String.Format("Reading Configuration: [file={0}][version={1}]", cfile, version));
-
-                Configuration configuration = null;
-                using (FileReader reader = new FileReader(cfile))
-                {
-                    reader.Open();
-                    XmlConfigParser parser = new XmlConfigParser();
-                    ConfigurationSettings settings = new ConfigurationSettings();
-                    settings.DownloadOptions = EDownloadOptions.LoadRemoteResourcesOnStartup;
-
-                    parser.Parse(cname, reader, Version.Parse(version), settings);
-                    configuration = parser.GetConfiguration();
-                }
                 Assert.NotNull(configuration);
                 string path = "root.configuration.node_1.node_2.node_3.*";
                 AbstractConfigNode node = configuration.Find(path);
@@ -221,7 +243,6 @@ namespace LibZConfig.Common.Config.Parsers
                 Assert.NotNull(node);
                 Assert.True(node.GetType() == typeof(ConfigListValueNode));
                 Assert.Equal(8, ((ConfigListValueNode)node).Count());
-                Assert.Equal(path, node.Name);
                 LogUtils.Debug(node.GetAbsolutePath());
 
             }
@@ -231,5 +252,31 @@ namespace LibZConfig.Common.Config.Parsers
                 throw ex;
             }
         }
+
+        [Fact]
+        public void SearchIndex()
+        {
+            try
+            {
+                Configuration configuration = ReadConfiguration();
+
+                Assert.NotNull(configuration);
+                string path = "root.configuration.node_1.ELEMENT_LIST";
+                AbstractConfigNode node = configuration.Find(path);
+                Assert.NotNull(node);
+                Assert.Equal(path, node.GetSearchPath());
+                path = "ELEMENT_LIST/2.string_2";
+                node = node.Find(path);
+                Assert.NotNull(node);
+                Assert.True(node.GetType() == typeof(ConfigValueNode));
+                LogUtils.Debug(node.GetAbsolutePath());
+            }
+            catch (Exception ex)
+            {
+                LogUtils.Error(ex);
+                throw ex;
+            }
+        }
+
     }
 }

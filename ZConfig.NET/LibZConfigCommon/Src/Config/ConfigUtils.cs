@@ -17,11 +17,15 @@ namespace LibZConfig.Common.Config
         /// <summary>
         /// Resolved node abbreviation tag
         /// </summary>
-        public string Abbreviation { get; set; }
+        public string AbbrReplacement { get; set; }
         /// <summary>
         /// Child node name, if any.
         /// </summary>
         public string ChildName { get; set; }
+        /// <summary>
+        /// Abbreviation tag
+        /// </summary>
+        public char Abbr { get; set; }
     }
 
     /// <summary>
@@ -29,6 +33,34 @@ namespace LibZConfig.Common.Config
     /// </summary>
     public static class ConfigUtils
     {
+        public static void CheckSearchRoot(List<string> path, string name, ConfigurationSettings settings)
+        {
+            if (path.Count > 0)
+            {
+                string nname = path[0];
+                ResolvedName resolved = ResolveName(nname, name, settings);
+                if (resolved == null)
+                {
+                    if (nname != name)
+                    {
+                        path.Insert(0, name);
+                    }
+                }
+                else
+                {
+                    if (String.IsNullOrWhiteSpace(resolved.ChildName))
+                    {
+                        nname = String.Format("{0}{1}", resolved.Name, resolved.Abbr);
+                    }
+                    else
+                    {
+                        nname = String.Format("{0}{1}{2}", resolved.Name, resolved.Abbr, resolved.ChildName);
+                    }
+                    path[0] = nname;
+                }
+            }
+        }
+
         /// <summary>
         /// Resolve the specified name for search.
         /// </summary>
@@ -51,14 +83,16 @@ namespace LibZConfig.Common.Config
             }
             else if (name.Contains(ConfigListNode<ConfigValueNode>.NODE_ABBREVIATION))
             {
-                return ResolveName(name, nodeName, ConfigPropertiesNode.NODE_ABBREVIATION, settings);
+                return ResolveName(name, nodeName, ConfigListNode<ConfigValueNode>.NODE_ABBREVIATION, settings);
             }
-            else if (name.Contains(ConfigurationSettings.NODE_SEARCH_WILDCARD))
+            else if (name.Length == 1 && name[0] == ConfigurationSettings.NODE_SEARCH_WILDCARD)
             {
                 ResolvedName resolved = new ResolvedName();
                 resolved.Name = nodeName;
-                resolved.Abbreviation = null;
+                resolved.AbbrReplacement = null;
                 resolved.ChildName = null;
+
+                return resolved;
             }
             return null;
         }
@@ -73,21 +107,22 @@ namespace LibZConfig.Common.Config
         private static ResolvedName ResolveName(string name, string nodeName, char abbr, ConfigurationSettings settings)
         {
             ResolvedName resolved = new ResolvedName();
-            switch(abbr)
+            switch (abbr)
             {
                 case ConfigAttributesNode.NODE_ABBREVIATION:
-                    resolved.Abbreviation = settings.AttributesNodeName;
+                    resolved.AbbrReplacement = settings.AttributesNodeName;
                     break;
                 case ConfigParametersNode.NODE_ABBREVIATION:
-                    resolved.Abbreviation = settings.ParametersNodeName;
+                    resolved.AbbrReplacement = settings.ParametersNodeName;
                     break;
                 case ConfigPropertiesNode.NODE_ABBREVIATION:
-                    resolved.Abbreviation = settings.PropertiesNodeName;
+                    resolved.AbbrReplacement = settings.PropertiesNodeName;
                     break;
                 case ConfigListNode<ConfigValueNode>.NODE_ABBREVIATION:
-                    resolved.Abbreviation = ConfigListNode<ConfigValueNode>.NODE_NAME;
+                    resolved.AbbrReplacement = ConfigListNode<ConfigValueNode>.NODE_NAME;
                     break;
             }
+            resolved.Abbr = abbr;
 
             string[] parts = name.Split(abbr);
             string nname = parts[0];

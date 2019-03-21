@@ -252,7 +252,7 @@ namespace LibZConfig.Common.Config.Nodes
             }
             else
             {
-                if (resolved.Abbreviation == NODE_NAME)
+                if (resolved.AbbrReplacement == NODE_NAME)
                 {
                     if (resolved.Name == Name && index == (path.Count - 1))
                     {
@@ -334,7 +334,7 @@ namespace LibZConfig.Common.Config.Nodes
             }
             else
             {
-                if (resolved.Abbreviation == NODE_NAME)
+                if (resolved.AbbrReplacement == NODE_NAME)
                 {
                     if (resolved.Name == Name)
                     {
@@ -348,6 +348,7 @@ namespace LibZConfig.Common.Config.Nodes
                             ConfigElementNode node = GetValue(indx);
                             if (node != null)
                             {
+                                path.Insert(index + 1, node.Name);
                                 return node.Find(path, index + 1);
                             }
                         }
