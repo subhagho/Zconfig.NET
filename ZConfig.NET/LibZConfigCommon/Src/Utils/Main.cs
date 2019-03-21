@@ -10,17 +10,8 @@ namespace LibZConfig.Common.Utils
         {
             try
             {
-                string input = "This is a ${variable} match ${test}";
-                LogUtils.Debug("INPUT>>" + input);
-                if (!VariableRegexParser.HasVariable(input))
-                {
-                    throw new Exception("Match failed.");
-                }
-                List<string> vars = VariableRegexParser.GetVariables(input);
-                foreach(string var in vars)
-                {
-                    LogUtils.Debug("VARIABLE:" + var);
-                }
+                string value = "true";
+                bool bv = (bool)ReflectionUtils.ConvertFromString<Boolean>(value);
             }
             catch (Exception e)
             {

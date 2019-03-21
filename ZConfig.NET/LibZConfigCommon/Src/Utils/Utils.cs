@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Diagnostics.Contracts;
 
 namespace LibZConfig.Common.Utils
 {
@@ -17,6 +17,12 @@ namespace LibZConfig.Common.Utils
                 }
             }
             return dict;
+        }
+
+        public static string Capitalize(this string value)
+        {
+            Contract.Requires(!String.IsNullOrWhiteSpace(value));
+            return String.Format("{0}{1}", Char.ToUpper(value[0]), value.Substring(1));
         }
     }
 }
