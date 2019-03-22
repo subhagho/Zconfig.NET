@@ -75,7 +75,7 @@ namespace LibZConfig.Common.Config.Nodes
         public void AddAll(List<T> values)
         {
             Contract.Requires(values != null && values.Count > 0);
-            foreach(T value in values)
+            foreach (T value in values)
             {
                 this.values.Add(value);
             }
@@ -204,6 +204,25 @@ namespace LibZConfig.Common.Config.Nodes
         public ConfigListValueNode(Configuration configuration, AbstractConfigNode parent) : base(configuration, parent)
         {
 
+        }
+
+        /// <summary>
+        /// Get the Config Values as a List of strings.
+        /// </summary>
+        /// <returns>Values as String List</returns>
+        public List<string> GetValueList()
+        {
+            List<ConfigValueNode> values = GetValues();
+            if (values != null && values.Count > 0)
+            {
+                List<string> vs = new List<string>(values.Count);
+                foreach(ConfigValueNode cv in values)
+                {
+                    vs.Add(cv.GetValue());
+                }
+                return vs;
+            }
+            return null;
         }
 
         /// <summary>

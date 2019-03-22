@@ -232,6 +232,26 @@ namespace LibZConfig.Common.Utils
         }
 
         /// <summary>
+        /// Check if the specified type extends the passed generic type.
+        /// </summary>
+        /// <param name="target">Type to check</param>
+        /// <param name="generic">Generic Type to look for</param>
+        /// <returns>Implements interface?</returns>
+        public static bool IsSubclassOfRawGeneric(Type target, Type generic)
+        {
+            while (target != null && target != typeof(object))
+            {
+                var cur = target.IsGenericType ? target.GetGenericTypeDefinition() : target;
+                if (generic == cur)
+                {
+                    return true;
+                }
+                target = target.BaseType;
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Convert to a primitive type from String.
         /// </summary>
         /// <param name="type">Target type</param>

@@ -6,7 +6,7 @@ using LibZConfig.Common.Config.Nodes;
 
 namespace LibZConfig.Common.Config.Parsers
 {
-    public class Test_ZConfigCommonXMLParser
+    public class Test_ZConfigXMLParser
     {
         private const string CONFIG_BASIC_PROPS_FILE = @"..\..\..\Resources\XML\test-config.properties";
         private const string CONFIG_INCLUDE_PROPS_FILE = @"..\..\..\Resources\XML\test-config-include.properties";

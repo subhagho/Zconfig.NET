@@ -82,7 +82,10 @@ namespace LibZConfig.Common.Config
                     throw new AnnotationProcessorException(String.Format("Annotation not found: [path={0}][type={1}]", path.Path, type.FullName));
                 }
                 if (node != null && node.GetType() == typeof(ConfigPathNode))
-                    return ReadValues((ConfigPathNode)node, target);
+                {
+                    target = ReadValues((ConfigPathNode)node, target);
+                    CallMethodInvokes((ConfigPathNode)node, target);
+                }
             }
             return target;
         }
@@ -113,9 +116,254 @@ namespace LibZConfig.Common.Config
                     throw new AnnotationProcessorException(String.Format("Annotation not found: [path={0}][type={1}]", path.Path, type.FullName));
                 }
                 if (node != null && node.GetType() == typeof(ConfigPathNode))
-                    return ReadValues((ConfigPathNode)node, target);
+                {
+                    target = ReadValues((ConfigPathNode)node, target);
+                    CallMethodInvokes((ConfigPathNode)node, target);
+                }
             }
             return target;
+        }
+
+        /// <summary>
+        /// Set the target instance values reading from the passed configuration.
+        /// </summary>
+        /// <typeparam name="T">Target Instance type</typeparam>
+        /// <param name="configuration">Configuration instance</param>
+        /// <param name="target">Target Type instance</param>
+        /// <returns>Updated Target Type instance</returns>
+        public static T Process<T>(Configuration configuration)
+        {
+            Contract.Requires(configuration != null);
+
+            Type type = typeof(T);
+            T target = default(T);
+
+            ConfigPath path = (ConfigPath)Attribute.GetCustomAttribute(type, typeof(ConfigPath));
+            if (path != null)
+            {
+                AbstractConfigNode node = null;
+                if (!String.IsNullOrWhiteSpace(path.Path))
+                {
+                    node = configuration.Find(path.Path);
+                }
+                if ((node == null || node.GetType() != typeof(ConfigPathNode)) && path.Required)
+                {
+                    throw new AnnotationProcessorException(String.Format("Annotation not found: [path={0}][type={1}]", path.Path, type.FullName));
+                }
+                if (node != null && node.GetType() == typeof(ConfigPathNode))
+                {
+                    target = CreateInstance<T>(type, (ConfigPathNode)node);
+                    if (target == null)
+                    {
+                        throw new AnnotationProcessorException(String.Format("Error creating instance of Type: [path={0}][type={1}]", path.Path, type.FullName));
+                    }
+                    target = ReadValues((ConfigPathNode)node, target);
+                    CallMethodInvokes((ConfigPathNode)node, target);
+                }
+            }
+            return target;
+        }
+
+        /// <summary>
+        /// Set the target instance values reading from the passed configuration node.
+        /// </summary>
+        /// <typeparam name="T">Target Instance type</typeparam>
+        /// <param name="parent">Configuration node instance</param>
+        /// <param name="target">Target Type instance</param>
+        /// <returns>Updated Target Type instance</returns>
+        public static T Process<T>(AbstractConfigNode parent)
+        {
+            Contract.Requires(parent != null);
+
+            Type type = typeof(T);
+            T target = default(T);
+
+            ConfigPath path = (ConfigPath)Attribute.GetCustomAttribute(type, typeof(ConfigPath));
+            if (path != null)
+            {
+                AbstractConfigNode node = null;
+                if (!String.IsNullOrWhiteSpace(path.Path))
+                {
+                    node = parent.Find(path.Path);
+                }
+                if ((node == null || node.GetType() != typeof(ConfigPathNode)) && path.Required)
+                {
+                    throw new AnnotationProcessorException(String.Format("Annotation not found: [path={0}][type={1}]", path.Path, type.FullName));
+                }
+                if (node != null && node.GetType() == typeof(ConfigPathNode))
+                {
+                    target = CreateInstance<T>(type, (ConfigPathNode)node);
+                    if (target == null)
+                    {
+                        throw new AnnotationProcessorException(String.Format("Error creating instance of Type: [path={0}][type={1}]", path.Path, type.FullName));
+                    }
+                    target = ReadValues((ConfigPathNode)node, target);
+                    CallMethodInvokes((ConfigPathNode)node, target);
+                }
+            }
+            return target;
+        }
+
+        /// <summary>
+        /// Create a new Instance of the specified type.
+        /// 
+        /// Type should have an empty constructor or a constructor with annotation.
+        /// </summary>
+        /// <typeparam name="T">Target Instance type</typeparam>
+        /// <param name="type">Type</param>
+        /// <param name="node">Configuration node.</param>
+        /// <returns>Created Instance</returns>
+        private static T CreateInstance<T>(Type type, ConfigPathNode node)
+        {
+            ConstructorInfo[] constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
+            if (constructors != null && constructors.Length > 0)
+            {
+                foreach (ConstructorInfo ci in constructors)
+                {
+                    MethodInvoke mi = (MethodInvoke)Attribute.GetCustomAttribute(ci, typeof(MethodInvoke));
+                    if (mi != null)
+                    {
+                        ParameterInfo[] parameters = ci.GetParameters();
+                        ConfigPathNode nnode = node;
+                        if (parameters != null && parameters.Length > 0)
+                        {
+                            if (!String.IsNullOrWhiteSpace(mi.Path))
+                            {
+                                AbstractConfigNode cnode = nnode.Find(mi.Path);
+                                if (cnode != null && cnode.GetType() == typeof(ConfigPathNode))
+                                {
+                                    nnode = (ConfigPathNode)cnode;
+                                }
+                            }
+                            if (nnode != null)
+                            {
+                                ConfigParametersNode pnode = nnode.GetParameters();
+                                if (pnode != null)
+                                {
+                                    List<object> values = FindParameters(pnode, ci.Name, parameters);
+                                    if (values != null && values.Count > 0)
+                                    {
+                                        return (T)Activator.CreateInstance(type, values.ToArray());
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return Activator.CreateInstance<T>();
+                        }
+                    }
+                }
+            }
+            return default(T);
+        }
+
+        /// <summary>
+        /// Check and Invoke annotated methods for this type.
+        /// </summary>
+        /// <typeparam name="T">Target Instance type</typeparam>
+        /// <param name="node">Configuration node.</param>
+        /// <param name="target">Target Type instance</param>
+        private static void CallMethodInvokes<T>(ConfigPathNode node, T target)
+        {
+            Type type = target.GetType();
+            MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
+            if (methods != null)
+            {
+                foreach (MethodInfo method in methods)
+                {
+                    MethodInvoke mi = (MethodInvoke)Attribute.GetCustomAttribute(method, typeof(MethodInvoke));
+                    if (mi != null)
+                    {
+                        bool invoked = false;
+                        ParameterInfo[] parameters = method.GetParameters();
+                        ConfigPathNode nnode = node;
+                        if (parameters != null && parameters.Length > 0)
+                        {
+                            if (!String.IsNullOrWhiteSpace(mi.Path))
+                            {
+                                AbstractConfigNode cnode = nnode.Find(mi.Path);
+                                if (cnode != null && cnode.GetType() == typeof(ConfigPathNode))
+                                {
+                                    nnode = (ConfigPathNode)cnode;
+                                }
+                            }
+                            if (nnode != null)
+                            {
+                                ConfigParametersNode pnode = nnode.GetParameters();
+                                if (pnode != null)
+                                {
+                                    List<object> values = FindParameters(pnode, method.Name, parameters);
+                                    if (values != null && values.Count > 0)
+                                    {
+                                        method.Invoke(target, values.ToArray());
+                                        invoked = true;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            method.Invoke(target, null);
+                            invoked = true;
+                        }
+
+                        if (!invoked)
+                        {
+                            throw new AnnotationProcessorException(String.Format("Error Invoking Method : [mehtod={0}][node={1}]",
+                                method.Name, node.GetSearchPath()));
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Find the parameter values for the method.
+        /// </summary>
+        /// <param name="pnode">Parameters Node</param>
+        /// <param name="method">Method Name</param>
+        /// <param name="parameters">Parameters</param>
+        /// <returns>List of object values</returns>
+        private static List<object> FindParameters(ConfigParametersNode pnode, string method, ParameterInfo[] parameters)
+        {
+            List<object> values = new List<object>();
+            foreach (ParameterInfo pi in parameters)
+            {
+                ConfigParam param = (ConfigParam)Attribute.GetCustomAttribute(pi, typeof(ConfigParam));
+                if (param != null)
+                {
+                    object v = null;
+                    ConfigValueNode cv = pnode.GetValue(param.Name);
+                    if (cv != null)
+                    {
+                        string value = cv.GetValue();
+                        if (!String.IsNullOrWhiteSpace(value))
+                        {
+                            v = ReflectionUtils.ConvertFromString(pi.ParameterType, value);
+                        }
+                    }
+                    if (v != null)
+                    {
+                        values.Add(v);
+                    }
+                    else
+                    {
+                        throw new AnnotationProcessorException(String.Format("Error Invoking Method: Value not found for parameter. [method={0}][parameter={1}]",
+                            method, pi.Name));
+                    }
+                }
+                else
+                {
+                    throw new AnnotationProcessorException(String.Format("Error Invoking Method: Annotation not defined for parameter. [method={0}][parameter={1}]",
+                        method, pi.Name));
+                }
+            }
+            if (values.Count > 0)
+            {
+                return values;
+            }
+            return null;
         }
 
         /// <summary>
@@ -129,7 +377,8 @@ namespace LibZConfig.Common.Config
         private static T ReadValues<T>(ConfigPathNode node, T target)
         {
             Type type = target.GetType();
-            PropertyInfo[] properties = type.GetProperties();
+            PropertyInfo[] properties = type.GetProperties(BindingFlags.Public |
+                                                            BindingFlags.Instance);
             if (properties != null)
             {
                 foreach (PropertyInfo property in properties)
@@ -137,21 +386,22 @@ namespace LibZConfig.Common.Config
                     ConfigParam param = (ConfigParam)Attribute.GetCustomAttribute(property, typeof(ConfigParam));
                     if (param != null)
                     {
-                        return ProcessProperty(node, target, property, param);
+                        target = ProcessProperty(node, target, property, param);
                     }
                     ConfigAttribute attr = (ConfigAttribute)Attribute.GetCustomAttribute(property, typeof(ConfigAttribute));
                     if (attr != null)
                     {
-                        return ProcessProperty(node, target, property, attr);
+                        target = ProcessProperty(node, target, property, attr);
                     }
                     ConfigValue value = (ConfigValue)Attribute.GetCustomAttribute(property, typeof(ConfigValue));
                     if (value != null)
                     {
-                        return ProcessProperty(node, target, property, value);
+                        target = ProcessProperty(node, target, property, value);
                     }
                 }
             }
-            FieldInfo[] fields = type.GetFields();
+            FieldInfo[] fields = type.GetFields(BindingFlags.NonPublic | BindingFlags.Public |
+                                                BindingFlags.Instance);
             if (fields != null)
             {
                 foreach (FieldInfo field in fields)
@@ -159,17 +409,17 @@ namespace LibZConfig.Common.Config
                     ConfigParam param = (ConfigParam)Attribute.GetCustomAttribute(field, typeof(ConfigParam));
                     if (param != null)
                     {
-                        return ProcessField(node, target, field, param);
+                        target = ProcessField(node, target, field, param);
                     }
                     ConfigAttribute attr = (ConfigAttribute)Attribute.GetCustomAttribute(field, typeof(ConfigAttribute));
                     if (attr != null)
                     {
-                        return ProcessField(node, target, field, attr);
+                        target = ProcessField(node, target, field, attr);
                     }
                     ConfigValue value = (ConfigValue)Attribute.GetCustomAttribute(field, typeof(ConfigValue));
                     if (value != null)
                     {
-                        return ProcessField(node, target, field, value);
+                        target = ProcessField(node, target, field, value);
                     }
                 }
             }
@@ -347,25 +597,53 @@ namespace LibZConfig.Common.Config
                     {
                         value = vn.GetValue();
                     }
+                    if (!String.IsNullOrWhiteSpace(value))
+                    {
+                        object v = GetValue<T>(pname, value, configValue.Function, property.PropertyType, target, configValue.Required);
+                        if (v != null)
+                            property.SetValue(target, v);
+                    }
                 }
                 else
                 {
-                    if (ReflectionUtils.ImplementsGenericInterface(property.PropertyType, typeof(List<>)))
+                    if (ReflectionUtils.IsSubclassOfRawGeneric(property.PropertyType, typeof(List<>)))
                     {
                         if (cnode.GetType() == typeof(ConfigListValueNode))
                         {
-
+                            ConfigListValueNode configList = (ConfigListValueNode)cnode;
+                            List<string> values = configList.GetValueList();
+                            if (values != null)
+                            {
+                                Type inner = property.PropertyType.GetGenericArguments()[0];
+                                object v = ReflectionUtils.ConvertListFromStrings(inner, values);
+                                if (v != null)
+                                {
+                                    property.SetValue(target, v);
+                                }
+                            }
+                        }
+                    }
+                    else if (ReflectionUtils.IsSubclassOfRawGeneric(property.PropertyType, typeof(HashSet<>)))
+                    {
+                        if (cnode.GetType() == typeof(ConfigListValueNode))
+                        {
+                            ConfigListValueNode configList = (ConfigListValueNode)cnode;
+                            List<string> values = configList.GetValueList();
+                            if (values != null)
+                            {
+                                Type inner = property.PropertyType.GetGenericArguments()[0];
+                                object v = ReflectionUtils.ConvertSetFromStrings(inner, values);
+                                if (v != null)
+                                {
+                                    property.SetValue(target, v);
+                                }
+                            }
                         }
                     }
                 }
             }
-            if (!String.IsNullOrWhiteSpace(value))
-            {
-                object v = GetValue<T>(pname, value, configValue.Function, property.PropertyType, target, configValue.Required);
-                if (v != null)
-                    property.SetValue(target, v);
-            }
-            else if (configValue.Required)
+            object ov = property.GetValue(target);
+            if (ov == null && configValue.Required)
             {
                 throw AnnotationProcessorException.Throw(target.GetType(), pname);
             }
@@ -527,15 +805,49 @@ namespace LibZConfig.Common.Config
                     {
                         value = vn.GetValue();
                     }
+                    if (!String.IsNullOrWhiteSpace(value))
+                    {
+                        object v = GetValue<T>(pname, value, configValue.Function, field.FieldType, target, configValue.Required);
+                        if (v != null)
+                            TypeUtils.CallSetter(field, target, v);
+                    }
+                }
+                else
+                {
+                    if (ReflectionUtils.IsSubclassOfRawGeneric(field.FieldType, typeof(List<>)))
+                    {
+                        if (cnode.GetType() == typeof(ConfigListValueNode))
+                        {
+                            ConfigListValueNode configList = (ConfigListValueNode)cnode;
+                            List<string> values = configList.GetValueList();
+                            if (values != null)
+                            {
+                                Type inner = field.FieldType.GetGenericArguments()[0];
+                                object v = ReflectionUtils.ConvertListFromStrings(inner, values);
+                                if (v != null)
+                                    TypeUtils.CallSetter(field, target, v);
+                            }
+                        }
+                    }
+                    else if (ReflectionUtils.IsSubclassOfRawGeneric(field.FieldType, typeof(HashSet<>)))
+                    {
+                        if (cnode.GetType() == typeof(ConfigListValueNode))
+                        {
+                            ConfigListValueNode configList = (ConfigListValueNode)cnode;
+                            List<string> values = configList.GetValueList();
+                            if (values != null)
+                            {
+                                Type inner = field.FieldType.GetGenericArguments()[0];
+                                object v = ReflectionUtils.ConvertSetFromStrings(inner, values);
+                                if (v != null)
+                                    TypeUtils.CallSetter(field, target, v);
+                            }
+                        }
+                    }
                 }
             }
-            if (!String.IsNullOrWhiteSpace(value))
-            {
-                object v = GetValue<T>(pname, value, configValue.Function, field.FieldType, target, configValue.Required);
-                if (v != null)
-                    TypeUtils.CallSetter(field, target, v);
-            }
-            else if (configValue.Required)
+            object ov = TypeUtils.CallGetter(field, target);
+            if (ov == null && configValue.Required)
             {
                 throw AnnotationProcessorException.Throw(target.GetType(), pname);
             }

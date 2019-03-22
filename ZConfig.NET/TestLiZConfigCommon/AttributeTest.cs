@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using LibZConfig.Common.Config.Attributes;
+using LibZConfig.Common.Utils;
 
-namespace LibZConfig.Common.Config.Attributes
+namespace LibZConfig.Common.Config
 {
     [ConfigPath(Path ="root.configuration.node_1")]
     public class Entity
@@ -14,6 +16,11 @@ namespace LibZConfig.Common.Config.Attributes
         [ConfigAttribute(Name = "ATTR_3", Path ="node_2.node_3")]
         public string Attr_3 { get; set; }
         public double DoubleValue { get; set; }
+
+        public Entity()
+        {
+
+        }
 
         [MethodInvoke()]
         public Entity([ConfigParam(Name = "PARAM_1")]string param_1)
@@ -31,10 +38,11 @@ namespace LibZConfig.Common.Config.Attributes
             return longValues;
         }
 
-        [MethodInvoke(Path = "node_2.node_3")]
+        [MethodInvoke(Path = "node_2.node_3.node_4")]
         public void SetDoubleValue([ConfigParam(Path = "node_4", Name = "PARAM_3")]double value)
         {
             DoubleValue = value;
+            LogUtils.Debug(String.Format("Invoked SetDoubleValue: Value = {0}", DoubleValue));
         }
     }
 }
