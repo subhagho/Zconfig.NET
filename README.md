@@ -114,6 +114,11 @@ __Note:__ Minor Version can be set to __(*)__ to denote match any.
 ## Reading Configuration (C#)
 Code snippets to read the configuration files.
 
+See test cases for more details:
+https://github.com/subhagho/Zconfig.NET/tree/master/ZConfig.NET/TestLiZConfigCommon
+Sample Configurations:
+
+
 __Reader__:
 Configuration Reader - Create an instance of the configuration reader, types supported
 - FileReader - Read from local file
