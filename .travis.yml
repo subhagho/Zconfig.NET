@@ -5,5 +5,5 @@ dotnet: 2.1
 install:
         - dotnet restore
 script:
-        - dotnet build
+        - dotnet build LibZConfigCommon\LibZConfigCommon.csproj
         - dotnet test TestLiZConfigCommon\TestLiZConfigCommon.csproj
