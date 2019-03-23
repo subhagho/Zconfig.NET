@@ -65,6 +65,7 @@ __Parameters__: Used for auto-wiring method parameters
 ```
 
 __Lists__:
+
 *Value Lists*: List of primitive/string values
 __Note:__ all list element names should be the same.
 ```xml
@@ -75,6 +76,7 @@ __Note:__ all list element names should be the same.
         ...
 </list_name>
 ```
+
 *Element Lists*: List of nested configuration elements.
 ```xml
 <list_name>
