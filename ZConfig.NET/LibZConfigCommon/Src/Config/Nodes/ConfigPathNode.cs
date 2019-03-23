@@ -54,9 +54,16 @@ namespace LibZConfig.Common.Config.Nodes
         public ConfigPathNode AddChildNode(AbstractConfigNode node)
         {
             Contract.Requires(node != null);
-
             node.Parent = this;
-            children[node.Name] = node;
+            if (!typeof(ConfigResourceNode).IsAssignableFrom(node.GetType()))
+            {
+               children[node.Name] = node;
+            } 
+            else
+            {
+                ConfigResourceNode rnode = (ConfigResourceNode)node;
+                children[rnode.ResourceName] = node;
+            }
             Updated();
 
             return this;

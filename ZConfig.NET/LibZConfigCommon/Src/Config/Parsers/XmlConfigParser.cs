@@ -419,6 +419,7 @@ namespace LibZConfig.Common.Config.Parsers
                             throw new ConfigurationException(String.Format("Erorr downloading file: File not created. [file={0}]", fi.FullName));
                         }
                         fnode.File = fi;
+                        fnode.Downloaded = true;
                     }
                 }
             }

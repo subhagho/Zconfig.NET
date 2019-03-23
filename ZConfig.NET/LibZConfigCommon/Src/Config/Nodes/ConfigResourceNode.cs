@@ -45,6 +45,10 @@ namespace LibZConfig.Common.Config.Nodes
         /// Resource name.
         /// </summary>
         public string ResourceName { get; set; }
+        /// <summary>
+        /// Has the resource been downloaded?
+        /// </summary>
+        public bool Downloaded { get; set; }
 
         /// <summary>
         /// Default Empty constructor
@@ -52,6 +56,7 @@ namespace LibZConfig.Common.Config.Nodes
         protected ConfigResourceNode() : base()
         {
             Type = EResourceType.NONE;
+            Downloaded = false;
         }
 
         /// <summary>
@@ -62,6 +67,7 @@ namespace LibZConfig.Common.Config.Nodes
         protected ConfigResourceNode(Configuration configuration, AbstractConfigNode parent) : base(configuration, parent)
         {
             Type = EResourceType.NONE;
+            Downloaded = false;
         }
 
         /// <summary>
@@ -119,7 +125,7 @@ namespace LibZConfig.Common.Config.Nodes
         public override AbstractConfigNode Find(List<string> path, int index)
         {
             string name = path[index];
-            if (name == Name && index == (path.Count - 1))
+            if (name == ResourceName && index == (path.Count - 1))
             {
                 return this;
             }

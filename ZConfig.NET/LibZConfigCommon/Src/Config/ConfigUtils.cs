@@ -147,5 +147,43 @@ namespace LibZConfig.Common.Config
             }
             return resolved;
         }
+
+        public static string MaskSearchPath(string path)
+        {
+            int si = path.IndexOf('[');
+            if (si >= 0)
+            {
+                string s0 = null;
+                if (si > 0)
+                {
+                    s0 = path.Substring(0, si);
+                }
+                int ei = path.IndexOf(']');
+                if (ei > 0)
+                {
+                    string s1 = path.Substring(si, (ei - si) + 1);
+                    string s2 = path.Substring(ei + 1);
+
+                    if (s1.Contains('.'))
+                    {
+                        s1 = s1.Replace(@".", @"###");
+                        if (s1 != null)
+                            path = String.Format("{0}{1}{2}", s0, s1, s2);
+                        else
+                            path = String.Format("{0}{1}", s1, s2);
+                    }
+                }
+            }
+            return path;
+        }
+
+        public static string UnmaskSearchPath(string path)
+        {
+            path = path.Replace(@"###", @".");
+            path = path.Replace("[", "");
+            path = path.Replace("]", "");
+
+            return path;
+        }
     }
 }

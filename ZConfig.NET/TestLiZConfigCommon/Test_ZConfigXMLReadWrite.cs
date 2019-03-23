@@ -253,11 +253,35 @@ namespace LibZConfig.Common.Config
                 AbstractConfigNode node = configuration.Find(path);
                 Assert.NotNull(node);
                 Assert.Equal(path, node.GetSearchPath());
-                path = "ELEMENT_LIST/2.string_2";
+                path = "ELEMENT_LIST%2.string_2";
                 node = node.Find(path);
                 Assert.NotNull(node);
                 Assert.True(node.GetType() == typeof(ConfigValueNode));
                 LogUtils.Debug(node.GetAbsolutePath());
+            }
+            catch (Exception ex)
+            {
+                LogUtils.Error(ex);
+                throw ex;
+            }
+        }
+
+        [Fact]
+        public void ReadResource()
+        {
+            try
+            {
+                Configuration configuration = ReadConfiguration();
+
+                Assert.NotNull(configuration);
+                string path = "root.configuration.node_1.node_2.node_3.[data/LICENSE.txt]";
+                AbstractConfigNode node = configuration.Find(path);
+                Assert.NotNull(node);
+                Assert.True(typeof(ConfigResourceNode).IsAssignableFrom(node.GetType()));
+
+                StreamReader reader = ConfigResourceHelper.GetResourceStream(configuration, path);
+                Assert.NotNull(reader);
+                reader.Dispose();
             }
             catch (Exception ex)
             {

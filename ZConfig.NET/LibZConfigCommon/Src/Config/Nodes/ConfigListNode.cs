@@ -14,7 +14,7 @@ namespace LibZConfig.Common.Config.Nodes
         /// <summary>
         /// Node abbreviation for search.
         /// </summary>
-        public const char NODE_ABBREVIATION = '/';
+        public const char NODE_ABBREVIATION = '%';
         /// <summary>
         /// Dummy node list name.
         /// </summary>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Diagnostics.Contracts;
+using LibZConfig.Common.Utils;
 using LibZConfig.Common.Config.Nodes;
 
 namespace LibZConfig.Common.Config
@@ -127,7 +128,7 @@ namespace LibZConfig.Common.Config
     /// <summary>
     /// Class defines a configuration instance.
     /// </summary>
-    public class Configuration
+    public class Configuration : IDisposable
     {
         /// <summary>
         /// Configuration Settings used to load this instance.
@@ -295,6 +296,17 @@ namespace LibZConfig.Common.Config
                     dir = String.Format("{0}{1}{2}", dir, Path.PathSeparator, subdir);
                 }
                 return Settings.GetTempDirectory(dir);
+            }
+        }
+
+        /// <summary>
+        /// Dispose this configuration instance.
+        /// </summary>
+        public void Dispose()
+        {
+            if (Settings.ShutdownOptions == EShutdownOptions.ClearDataOnShutdown)
+            {
+                FileUtils.DeleteTempDirectory(Settings.GetTempDirectory());
             }
         }
     }

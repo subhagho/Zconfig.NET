@@ -220,10 +220,16 @@ namespace LibZConfig.Common.Config.Nodes
             {
                 path = string.Format("{0}.{1}", Name, path);
             }
+            path = ConfigUtils.MaskSearchPath(path);
             string[] parts = path.Split('.');
             if (parts != null && parts.Length > 0)
             {
-                List<string> pList = new List<string>(parts);
+                List<string> pList = new List<string>();
+                foreach(string part in parts)
+                {
+                    string npart = ConfigUtils.UnmaskSearchPath(part);
+                    pList.Add(npart);
+                }
                 ConfigUtils.CheckSearchRoot(pList, Name, Configuration.Settings);
                 return Find(pList, 0);
             }
