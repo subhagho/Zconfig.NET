@@ -114,10 +114,11 @@ __Note:__ Minor Version can be set to __(*)__ to denote match any.
 ## Reading Configuration (C#)
 Code snippets to read the configuration files.
 
-See test cases for more details:
+__See test cases for more details:__
 
 https://github.com/subhagho/Zconfig.NET/tree/master/ZConfig.NET/TestLiZConfigCommon
-Sample Configurations:
+
+__Sample Configurations:__
 
 https://github.com/subhagho/Zconfig.NET/tree/master/ZConfig.NET/TestLiZConfigCommon/Resources/XML
 
