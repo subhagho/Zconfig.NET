@@ -7,5 +7,5 @@ before_install:
 install:
         - dotnet restore
 script:
-        - dotnet build ZConfig.NET\LibZConfigCommon\LibZConfigCommon.csproj
-        - dotnet test ZConfig.NET\TestLiZConfigCommon\TestLiZConfigCommon.csproj
+        - dotnet build 
+        - dotnet test TestLiZConfigCommon\TestLiZConfigCommon.csproj
