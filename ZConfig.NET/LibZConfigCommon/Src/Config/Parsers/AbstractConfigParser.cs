@@ -42,10 +42,11 @@ namespace LibZConfig.Common.Config.Parsers
         /// <summary>
         /// Post Load function to be called after loading the configuration.
         /// </summary>
-        protected void PostLoad()
+        /// <param name="replace">Replace variables?</param>
+        protected void PostLoad(bool replace)
         {
             Dictionary<string, ConfigValueNode> properties = new Dictionary<string, ConfigValueNode>();
-            NodePostLoad(configuration.RootConfigNode, properties);
+            NodePostLoad(configuration.RootConfigNode, properties, replace);
 
             configuration.Validate();
             configuration.RootConfigNode.UpdateState(ENodeState.Synced);
@@ -57,7 +58,8 @@ namespace LibZConfig.Common.Config.Parsers
         /// </summary>
         /// <param name="node">Configuration Node.</param>
         /// <param name="inProps">Scoped properties map</param>
-        private void NodePostLoad(AbstractConfigNode node, Dictionary<string, ConfigValueNode> inProps)
+        /// <param name="replace">Replace variables?</param>
+        private void NodePostLoad(AbstractConfigNode node, Dictionary<string, ConfigValueNode> inProps, bool replace)
         {
             Dictionary<string, ConfigValueNode> properties = General.Clone<string, ConfigValueNode>(inProps);
             if (node.GetType() == typeof(ConfigPathNode))
@@ -83,7 +85,7 @@ namespace LibZConfig.Common.Config.Parsers
                 {
                     foreach (string key in pnode.GetChildren().Keys)
                     {
-                        NodePostLoad(pnode.GetChildren()[key], properties);
+                        NodePostLoad(pnode.GetChildren()[key], properties, replace);
                     }
                 }
             }
@@ -92,7 +94,7 @@ namespace LibZConfig.Common.Config.Parsers
                 if (node.GetType() == typeof(ConfigParametersNode))
                 {
                     ConfigParametersNode pnode = (ConfigParametersNode)node;
-                    if (!pnode.IsEmpty())
+                    if (!pnode.IsEmpty() && replace)
                     {
                         foreach (string key in pnode.GetValues().Keys)
                         {
@@ -109,7 +111,7 @@ namespace LibZConfig.Common.Config.Parsers
                 else if (node.GetType() == typeof(ConfigAttributesNode))
                 {
                     ConfigAttributesNode pnode = (ConfigAttributesNode)node;
-                    if (!pnode.IsEmpty())
+                    if (!pnode.IsEmpty() && replace)
                     {
                         foreach (string key in pnode.GetValues().Keys)
                         {
@@ -126,7 +128,7 @@ namespace LibZConfig.Common.Config.Parsers
                 else if (node.GetType() == typeof(ConfigListValueNode))
                 {
                     ConfigListValueNode pnode = (ConfigListValueNode)node;
-                    if (!pnode.IsEmpty())
+                    if (!pnode.IsEmpty() && replace)
                     {
                         foreach (ConfigValueNode vn in pnode.GetValues())
                         {
@@ -146,18 +148,21 @@ namespace LibZConfig.Common.Config.Parsers
                     {
                         foreach (ConfigElementNode vn in pnode.GetValues())
                         {
-                            NodePostLoad(vn, properties);
+                            NodePostLoad(vn, properties, replace);
                         }
                     }
                 }
                 else if (node.GetType() == typeof(ConfigValueNode))
                 {
-                    ConfigValueNode vn = (ConfigValueNode)node;
-                    string value = vn.GetValue();
-                    if (!String.IsNullOrWhiteSpace(value))
+                    if (replace)
                     {
-                        string nv = ReplaceVariable(value, properties);
-                        vn.SetValue(nv);
+                        ConfigValueNode vn = (ConfigValueNode)node;
+                        string value = vn.GetValue();
+                        if (!String.IsNullOrWhiteSpace(value))
+                        {
+                            string nv = ReplaceVariable(value, properties);
+                            vn.SetValue(nv);
+                        }
                     }
                 }
             }

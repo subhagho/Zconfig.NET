@@ -95,6 +95,12 @@ namespace LibZConfig.Common.Config.Writers
             return filename;
         }
 
+        /// <summary>
+        /// Write a configuration node.
+        /// </summary>
+        /// <param name="writer">XML Writer</param>
+        /// <param name="node">Node To write</param>
+        /// <param name="settings">Configuration Settings.</param>
         private void WriteNode(XmlWriter writer, AbstractConfigNode node, ConfigurationSettings settings)
         {
             if (node.GetType() == typeof(ConfigPathNode))
@@ -172,6 +178,11 @@ namespace LibZConfig.Common.Config.Writers
             }
         }
 
+        /// <summary>
+        /// Write a configuration resource node.
+        /// </summary>
+        /// <param name="writer">XML Writer</param>
+        /// <param name="node">Resource Node</param>
         private void WriteResourceNode(XmlWriter writer, ConfigResourceNode node)
         {
             writer.WriteStartElement(ConstXmlResourceNode.XML_CONFIG_NODE_RESOURCE);
@@ -185,6 +196,12 @@ namespace LibZConfig.Common.Config.Writers
             writer.WriteEndElement();
         }
 
+        /// <summary>
+        /// Write a Element List node.
+        /// </summary>
+        /// <param name="writer">XML Writer</param>
+        /// <param name="node">List Element Node.</param>
+        /// <param name="settings">Configuration Settings.</param>
         private void WriteListElementNode(XmlWriter writer, ConfigElementListNode node, ConfigurationSettings settings)
         {
             writer.WriteStartElement(node.Name);
@@ -201,6 +218,11 @@ namespace LibZConfig.Common.Config.Writers
             writer.WriteEndElement();
         }
 
+        /// <summary>
+        /// Write a Value List node.
+        /// </summary>
+        /// <param name="writer">XML Writer</param>
+        /// <param name="node">List Value node</param>
         private void WriteListValueNode(XmlWriter writer, ConfigListValueNode node)
         {
             writer.WriteStartElement(node.Name);
@@ -219,6 +241,12 @@ namespace LibZConfig.Common.Config.Writers
             writer.WriteEndElement();
         }
 
+        /// <summary>
+        /// Write a Key/Value node (parameters/properties)
+        /// </summary>
+        /// <param name="writer">XML Writer</param>
+        /// <param name="node">Key/Value node</param>
+        /// <param name="name">Node name</param>
         private void WriteKeyValueNode(XmlWriter writer, ConfigKeyValueNode node, string name)
         {
             writer.WriteStartElement(name);
@@ -239,6 +267,11 @@ namespace LibZConfig.Common.Config.Writers
             writer.WriteEndElement();
         }
 
+        /// <summary>
+        /// Write the XML Configuration Header.
+        /// </summary>
+        /// <param name="writer">XML Writer</param>
+        /// <param name="header">Cofniguration Header</param>
         private void WriteHeader(XmlWriter writer, ConfigurationHeader header)
         {
             writer.WriteStartElement(ConstXmlConfigHeader.XML_CONFIG_NODE_HEADER);
@@ -266,6 +299,12 @@ namespace LibZConfig.Common.Config.Writers
             writer.WriteEndElement();
         }
 
+        /// <summary>
+        /// Write a Modified By node.
+        /// </summary>
+        /// <param name="writer">XML Writer</param>
+        /// <param name="name">Node name</param>
+        /// <param name="modifiedBy">Modified By</param>
         private void WriteModifiedBy(XmlWriter writer, string name, ModifiedBy modifiedBy)
         {
             writer.WriteStartElement(name);

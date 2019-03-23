@@ -75,6 +75,11 @@ namespace LibZConfig.Common.Config
         public EShutdownOptions ShutdownOptions { get; set; }
 
         /// <summary>
+        /// Replace the variables with the defined properties?
+        /// </summary>
+        public bool ReplaceProperties { get; set; }
+
+        /// <summary>
         /// Default empty constructor: Setup the defaults.
         /// </summary>
         public ConfigurationSettings()
@@ -86,6 +91,7 @@ namespace LibZConfig.Common.Config
             TemporaryFolder = FileUtils.GetTempDirectory("ZConfig");
             DownloadOptions = EDownloadOptions.LoadRemoteResourcesOnDemand;
             ShutdownOptions = EShutdownOptions.ReuseData;
+            ReplaceProperties = true;
         }
 
         /// <summary>

@@ -140,7 +140,7 @@ namespace LibZConfig.Common.Config.Parsers
                 XmlElement root = doc.DocumentElement;
                 ParseRootNode(name, version, root);
 
-                PostLoad();
+                PostLoad(settings.ReplaceProperties);
 
                 LogUtils.Debug(String.Format("Configuration Loaded: [name={0}]", configuration.Header.Name), configuration);
             }

@@ -60,42 +60,7 @@ namespace LibZConfig.Common.Config
             }
         }
 
-        [Fact]
-        public void Parse()
-        {
-            try
-            {
-                Properties properties = new Properties();
-                properties.Load(CONFIG_BASIC_PROPS_FILE);
-
-                string cname = properties.GetProperty(CONFIG_PROP_NAME);
-                Assert.False(String.IsNullOrWhiteSpace(cname));
-                string cfile = properties.GetProperty(CONFIG_PROP_FILENAME);
-                Assert.False(String.IsNullOrWhiteSpace(cfile));
-                string version = properties.GetProperty(CONFIG_PROP_VERSION);
-                Assert.False(String.IsNullOrWhiteSpace(version));
-
-                LogUtils.Info(String.Format("Reading Configuration: [file={0}][version={1}]", cfile, version));
-
-                using (FileReader reader = new FileReader(cfile))
-                {
-                    reader.Open();
-                    XmlConfigParser parser = new XmlConfigParser();
-                    ConfigurationSettings settings = new ConfigurationSettings();
-                    settings.DownloadOptions = EDownloadOptions.LoadRemoteResourcesOnStartup;
-
-                    parser.Parse(cname, reader, Version.Parse(version), settings);
-                }
-            }
-            catch (Exception ex)
-            {
-                LogUtils.Error(ex);
-                throw ex;
-            }
-        }
-
-        [Fact]
-        public void ParseInlcude()
+        private Configuration ReadIncludeConfiguration()
         {
             try
             {
@@ -116,6 +81,8 @@ namespace LibZConfig.Common.Config
                     reader.Open();
                     XmlConfigParser parser = new XmlConfigParser();
                     parser.Parse(cname, reader, Version.Parse(version), null);
+
+                    return parser.GetConfiguration();
                 }
             }
             catch (Exception ex)
@@ -123,6 +90,20 @@ namespace LibZConfig.Common.Config
                 LogUtils.Error(ex);
                 throw ex;
             }
+        }
+
+        [Fact]
+        public void Parse()
+        {
+            Configuration config = ReadConfiguration();
+            Assert.NotNull(config);
+        }
+
+        [Fact]
+        public void ParseInlcude()
+        {
+            Configuration config = ReadIncludeConfiguration();
+            Assert.NotNull(config);
         }
 
         [Fact]
@@ -336,7 +317,7 @@ namespace LibZConfig.Common.Config
         {
             try
             {
-                Configuration configuration = ReadConfiguration();
+                Configuration configuration = ReadIncludeConfiguration();
 
                 Assert.NotNull(configuration);
                 XmlConfigWriter writer = new XmlConfigWriter();
