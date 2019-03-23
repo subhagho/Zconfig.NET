@@ -72,10 +72,20 @@ namespace LibZConfig.Common.Config.Attributes
 
     }
 
+    /// <summary>
+    /// String to date transformer.
+    /// 
+    /// NOTE: Uses default Date/Time format "MM.dd.yyyy HH:mm:ss"
+    /// </summary>
     public class StringToDateTransformer : IStringValueTransformer<DateTime>
     {
         private const string DEFAULT_DATETIME_FORMAT = "MM.dd.yyyy HH:mm:ss";
 
+        /// <summary>
+        /// Transform the target value to the soruce type.
+        /// </summary>
+        /// <param name="data">Input Date/time</param>
+        /// <returns>String Value</returns>
         public string Reverse(DateTime data)
         {
             if (data != null)
@@ -85,6 +95,11 @@ namespace LibZConfig.Common.Config.Attributes
             return null;
         }
 
+        /// <summary>
+        /// Transform the source value to the target type.
+        /// </summary>
+        /// <param name="data">Input String</param>
+        /// <returns>Date/Time Value</returns>
         public DateTime Transform(string data)
         {
             if (!String.IsNullOrWhiteSpace(data))
