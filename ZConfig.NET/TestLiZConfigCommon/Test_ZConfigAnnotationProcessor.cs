@@ -9,7 +9,7 @@ namespace LibZConfig.Common.Config
 {
     public class Test_ZConfigAnnotationProcessor
     {
-        private const string CONFIG_BASIC_PROPS_FILE = @"..\..\..\Resources\XML\test-config.properties";
+        private const string CONFIG_BASIC_PROPS_FILE = @"../../../Resources/XML/test-config.properties";
         private const string CONFIG_PROP_NAME = "config.name";
         private const string CONFIG_PROP_FILENAME = "config.file";
         private const string CONFIG_PROP_VERSION = "config.version";
