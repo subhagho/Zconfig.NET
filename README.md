@@ -142,4 +142,49 @@ using (FileReader reader = new FileReader(cfile))
     return configuration;
 }
 ```
+__Configuration Settings__
+```csharp
+        /// <summary>
+        /// Node name for properties nodes.
+        /// </summary>
+        public string PropertiesNodeName { get; set; }
+        /// <summary>
+        /// Node name for attributes nodes.
+        /// </summary>
+        public string AttributesNodeName { get; set; }
+        /// <summary>
+        /// Node name for parameters nodes.
+        /// </summary>
+        public string ParametersNodeName { get; set; }
+        /// <summary>
+        /// Temporary folder to be used by ZConfig.
+        /// </summary>
+        public string TemporaryFolder { get; set; }
+        /// <summary>
+        /// Default download options.
+        /// </summary>
+        public EDownloadOptions DownloadOptions { get; set; }
+        /// <summary>
+        /// Default shutdown options.
+        /// </summary>
+        public EShutdownOptions ShutdownOptions { get; set; }
 
+        /// <summary>
+        /// Replace the variables with the defined properties?
+        /// </summary>
+        public bool ReplaceProperties { get; set; }
+```
+__Defaults:__
+```csharp
+            string DEFAULT_PROPERTIES_NODE_NAME = "properties";
+            string DEFAULT_ATTRIBUTES_NODE_NAME = "@";
+            string DEFAULT_PARAMETERS_NODE_NAME = "parameters";
+        
+            PropertiesNodeName = DEFAULT_PROPERTIES_NODE_NAME;
+            AttributesNodeName = DEFAULT_ATTRIBUTES_NODE_NAME;
+            ParametersNodeName = DEFAULT_PARAMETERS_NODE_NAME;
+
+            TemporaryFolder = FileUtils.GetTempDirectory("ZConfig");
+            DownloadOptions = EDownloadOptions.LoadRemoteResourcesOnDemand;
+            ShutdownOptions = EShutdownOptions.ReuseData;
+```
