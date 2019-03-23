@@ -145,7 +145,7 @@
           <PARAM_3>TEST_PARAM_3</PARAM_3>
           <PARAM_4>TEST_PARAM_4</PARAM_4>
         </parameters>
-        <remoteResource type="BLOB" resourceName="common-1.0-20171127.050926-1-javadoc.jar">
+        <remoteResource type="FILE" resourceName="common-1.0-20171127.050926-1-javadoc.jar">
           <url>
             https://github.com/subhagho/openriver-maven/blob/wookler-repo/com/wookler/common/1.0-SNAPSHOT/common-1.0-20171127.050926-1-javadoc.jar?raw=true
           </url>
