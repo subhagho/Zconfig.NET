@@ -1,4 +1,30 @@
-﻿using System;
+﻿#region copyright
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+// Copyright (c) 2019
+// Date: 2019-3-23
+// Project: LibZConfigCommon
+// Subho Ghosh (subho dot ghosh at outlook.com)
+//
+//
+#endregion
+using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Text;
@@ -23,9 +49,9 @@ namespace LibZConfig.Common.Config.Nodes
         /// </summary>
         DIRECTORY,
         /// <summary>
-        /// BLOB File Resource
+        /// Zip File Resource
         /// </summary>
-        BLOB
+        ZIP
     }
 
     /// <summary>
@@ -194,12 +220,17 @@ namespace LibZConfig.Common.Config.Nodes
     /// <summary>
     /// BLOB Resource Handle
     /// </summary>
-    public class ConfigResourceBlob : ConfigResourceFile
+    public class ConfigResourceZip : ConfigResourceFile
     {
+        /// <summary>
+        /// Local where the content is unzipped.
+        /// </summary>
+        public DirectoryInfo Directory { get; set; }
+
         /// <summary>
         /// Default Empty constructor
         /// </summary>
-        public ConfigResourceBlob() : base()
+        public ConfigResourceZip() : base()
         {
 
         }
@@ -209,7 +240,7 @@ namespace LibZConfig.Common.Config.Nodes
         /// </summary>
         /// <param name="configuration">Configuration instance</param>
         /// <param name="parent">Parent node.</param>
-        public ConfigResourceBlob(Configuration configuration, AbstractConfigNode parent) : base(configuration, parent)
+        public ConfigResourceZip(Configuration configuration, AbstractConfigNode parent) : base(configuration, parent)
         {
 
         }

@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Wookler.ZConfig.Common</id>
-    <version>0.1-alpha</version>
+    <version>0.1.1-alpha</version>
     <title>ZConfig Common Library</title>
     <authors>Subho Ghosh</authors>
     <owners>Subho Ghosh</owners>
