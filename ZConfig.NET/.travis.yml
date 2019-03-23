@@ -1,0 +1,9 @@
+language: csharp
+solution: ZConfig.NET.sln
+mono: none
+dotnet: 2.1
+install:
+        - dotnet restore
+script:
+        - dotnet build
+        - dotnet test TestLiZConfigCommon\TestLiZConfigCommon.csproj
