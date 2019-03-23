@@ -1,12 +1,15 @@
 using System;
+using System.IO;
 using Xunit;
 using LibZConfig.Common.Utils;
 using LibZConfig.Common.Config.Readers;
 using LibZConfig.Common.Config.Nodes;
+using LibZConfig.Common.Config.Parsers;
+using LibZConfig.Common.Config.Writers;
 
-namespace LibZConfig.Common.Config.Parsers
+namespace LibZConfig.Common.Config
 {
-    public class Test_ZConfigXMLParser
+    public class Test_ZConfigXMLReadWrite
     {
         private const string CONFIG_BASIC_PROPS_FILE = @"..\..\..\Resources\XML\test-config.properties";
         private const string CONFIG_INCLUDE_PROPS_FILE = @"..\..\..\Resources\XML\test-config-include.properties";
@@ -127,9 +130,9 @@ namespace LibZConfig.Common.Config.Parsers
         {
             try
             {
-                
+
                 Configuration configuration = ReadConfiguration();
-             
+
                 Assert.NotNull(configuration);
                 string path = "root.configuration.node_1";
                 AbstractConfigNode node = configuration.Find(path);
@@ -162,7 +165,7 @@ namespace LibZConfig.Common.Config.Parsers
                 AbstractConfigNode node = configuration.Find(path);
                 Assert.NotNull(node);
                 Assert.True(node.GetType() == typeof(ConfigParametersNode));
-                
+
                 path = "#PARAM_1";
                 node = configuration.Find(node, path);
                 Assert.True(node.GetType() == typeof(ConfigValueNode));
@@ -211,7 +214,7 @@ namespace LibZConfig.Common.Config.Parsers
                 node = configuration.Find(path);
                 Assert.NotNull(node);
                 Assert.True(node.GetType() == typeof(ConfigValueNode));
-                
+
                 path = "root.configuration.node_1.node_2.node_3@";
                 node = configuration.Find(path);
                 Assert.NotNull(node);
@@ -278,5 +281,78 @@ namespace LibZConfig.Common.Config.Parsers
             }
         }
 
+        [Fact]
+        public void Write()
+        {
+            try
+            {
+                Configuration configuration = ReadConfiguration();
+
+                Assert.NotNull(configuration);
+                string path = FileUtils.GetTempDirectory();
+                XmlConfigWriter writer = new XmlConfigWriter();
+                string filename = writer.Write(configuration, path);
+
+                FileInfo fi = new FileInfo(filename);
+                if (!fi.Exists)
+                {
+                    throw new Exception(String.Format("Error getting created file: [file={0}]", fi.FullName));
+                }
+                LogUtils.Info(String.Format("Configuration written to file. [file={0}]", fi.FullName));
+
+                Properties properties = new Properties();
+                properties.Load(CONFIG_BASIC_PROPS_FILE);
+
+                string cname = properties.GetProperty(CONFIG_PROP_NAME);
+                Assert.False(String.IsNullOrWhiteSpace(cname));
+                string version = properties.GetProperty(CONFIG_PROP_VERSION);
+                Assert.False(String.IsNullOrWhiteSpace(version));
+
+                LogUtils.Info(String.Format("Reading Configuration: [file={0}][version={1}]", filename, version));
+
+                using (FileReader reader = new FileReader(filename))
+                {
+                    reader.Open();
+                    XmlConfigParser parser = new XmlConfigParser();
+                    ConfigurationSettings settings = new ConfigurationSettings();
+                    settings.DownloadOptions = EDownloadOptions.LoadRemoteResourcesOnStartup;
+
+                    parser.Parse(cname, reader, Version.Parse(version), settings);
+
+                    Configuration nconfig = parser.GetConfiguration();
+
+                    LogUtils.Debug("New Configuration:", nconfig);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogUtils.Error(ex);
+                throw ex;
+            }
+        }
+
+        [Fact]
+        public void WriteToString()
+        {
+            try
+            {
+                Configuration configuration = ReadConfiguration();
+
+                Assert.NotNull(configuration);
+                XmlConfigWriter writer = new XmlConfigWriter();
+                string config = writer.Write(configuration);
+
+                if (String.IsNullOrWhiteSpace(config))
+                {
+                    throw new Exception("Error getting configuration as String");
+                }
+                LogUtils.Info(String.Format("Configuration written to String: [config={0}]", config));
+            }
+            catch (Exception ex)
+            {
+                LogUtils.Error(ex);
+                throw ex;
+            }
+        }
     }
 }
