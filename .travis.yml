@@ -3,7 +3,8 @@ solution: ZConfig.NET.sln
 mono: none
 dotnet: 2.1
 install:
-        - dotnet restore
+        - dotnet restore LibZConfigCommon\LibZConfigCommon.csproj
+        - dotnet restore TestLiZConfigCommon\TestLiZConfigCommon.csproj
 script:
         - dotnet build LibZConfigCommon\LibZConfigCommon.csproj
         - dotnet test TestLiZConfigCommon\TestLiZConfigCommon.csproj
