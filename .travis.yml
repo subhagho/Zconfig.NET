@@ -1,10 +1,9 @@
 language: csharp
-solution: ZConfig.NET\ZConfig.NET.sln
+solution: ZConfig.NET/ZConfig.NET.sln
 mono: none
 dotnet: 2.1
 install:
-        - dotnet restore ZConfig.NET\LibZConfigCommon\LibZConfigCommon.csproj
-        - dotnet restore ZConfig.NET\TestLiZConfigCommon\TestLiZConfigCommon.csproj
+        - dotnet
 script:
         - dotnet build ZConfig.NET\LibZConfigCommon\LibZConfigCommon.csproj
         - dotnet test ZConfig.NET\TestLiZConfigCommon\TestLiZConfigCommon.csproj
