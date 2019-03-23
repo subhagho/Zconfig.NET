@@ -115,9 +115,11 @@ __Note:__ Minor Version can be set to __(*)__ to denote match any.
 Code snippets to read the configuration files.
 
 See test cases for more details:
+
 https://github.com/subhagho/Zconfig.NET/tree/master/ZConfig.NET/TestLiZConfigCommon
 Sample Configurations:
 
+https://github.com/subhagho/Zconfig.NET/tree/master/ZConfig.NET/TestLiZConfigCommon/Resources/XML
 
 __Reader__:
 Configuration Reader - Create an instance of the configuration reader, types supported
