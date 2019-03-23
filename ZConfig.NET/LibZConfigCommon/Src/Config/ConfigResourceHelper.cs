@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.IO;
 using LibZConfig.Common.Utils;
+using LibZConfig.Common.Config.Nodes;
 
 namespace LibZConfig.Common.Config
 {
@@ -9,6 +10,15 @@ namespace LibZConfig.Common.Config
     {
         public static StreamReader GetResourceStream(Configuration configuration, string path)
         {
+            Contract.Requires(configuration != null);
+            Contract.Requires(!String.IsNullOrWhiteSpace(path));
+
+            AbstractConfigNode node = configuration.Find(path);
+            if (node != null && typeof(ConfigResourceNode).IsAssignableFrom(node.GetType()))
+            {
+                ConfigResourceNode rnode = (ConfigResourceNode)node;
+                
+            }
             return null;
         }
     }
