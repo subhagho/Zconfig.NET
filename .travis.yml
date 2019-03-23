@@ -2,7 +2,8 @@ language: csharp
 solution: ZConfig.NET.sln
 mono: none
 dotnet: 2.1
-before_install:cd ZConfig.NET
+before_install:
+        - cd ZConfig.NET
 install:
         - dotnet restore
 script:
