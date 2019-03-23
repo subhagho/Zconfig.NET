@@ -8,4 +8,4 @@ install:
         - dotnet restore
 script:
         - dotnet build 
-        - dotnet test TestLiZConfigCommon\TestLiZConfigCommon.csproj
+        - dotnet test TestLiZConfigCommon\TestLibZConfigCommon.csproj
