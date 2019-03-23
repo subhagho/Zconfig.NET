@@ -44,6 +44,7 @@ namespace LibZConfig.Common.Config
                     reader.Open();
                     XmlConfigParser parser = new XmlConfigParser();
                     ConfigurationSettings settings = new ConfigurationSettings();
+                    
                     settings.DownloadOptions = EDownloadOptions.LoadRemoteResourcesOnStartup;
 
                     parser.Parse(cname, reader, Version.Parse(version), settings);
@@ -60,7 +61,7 @@ namespace LibZConfig.Common.Config
             }
         }
 
-        private Configuration ReadIncludeConfiguration()
+        private Configuration ReadIncludeConfiguration(bool replace)
         {
             try
             {
@@ -80,7 +81,10 @@ namespace LibZConfig.Common.Config
                 {
                     reader.Open();
                     XmlConfigParser parser = new XmlConfigParser();
-                    parser.Parse(cname, reader, Version.Parse(version), null);
+                    ConfigurationSettings settings = new ConfigurationSettings();
+                    settings.ReplaceProperties = replace;
+
+                    parser.Parse(cname, reader, Version.Parse(version), settings);
 
                     return parser.GetConfiguration();
                 }
@@ -102,7 +106,7 @@ namespace LibZConfig.Common.Config
         [Fact]
         public void ParseInlcude()
         {
-            Configuration config = ReadIncludeConfiguration();
+            Configuration config = ReadIncludeConfiguration(true);
             Assert.NotNull(config);
         }
 
@@ -317,7 +321,7 @@ namespace LibZConfig.Common.Config
         {
             try
             {
-                Configuration configuration = ReadIncludeConfiguration();
+                Configuration configuration = ReadIncludeConfiguration(false);
 
                 Assert.NotNull(configuration);
                 XmlConfigWriter writer = new XmlConfigWriter();
