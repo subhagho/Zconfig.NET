@@ -431,25 +431,26 @@ namespace LibZConfig.Common.Config.Parsers
                 if (type == EResourceType.ZIP || type == EResourceType.FILE)
                 {
                     ConfigResourceFile fnode = (ConfigResourceFile)node;
-                    using (AbstractReader reader = ReaderTypeHelper.GetReader(node.Location))
-                    {
-                        if (reader == null)
-                        {
-                            throw new ConfigurationException(String.Format("No reader found for URI. [uri={0}]", node.Location.ToString()));
-                        }
-                        reader.Open();
-                        string file = FileUtils.WriteLocalFile(reader.GetStream(), node.ResourceName, settings.GetTempDirectory());
-                        FileInfo fi = new FileInfo(file);
-                        if (!fi.Exists)
-                        {
-                            throw new ConfigurationException(String.Format("Erorr downloading file: File not created. [file={0}]", fi.FullName));
-                        }
-                        fnode.File = fi;
-                        fnode.Downloaded = true;
-                    }
+                    ConfigResourceHelper.DownloadResource(fnode);
                 }
             }
             
+            if (type == EResourceType.DIRECTORY)
+            {
+                ConfigDirectoryResource dnode = (ConfigDirectoryResource)node;
+                if (!dnode.Location.IsFile)
+                {
+                    throw new ConfigurationException(String.Format("Invalid URI: Must be a local/mounted directory. [uri={0}]", dnode.Location.ToString()));
+                }
+                string dir = dnode.Location.LocalPath;
+                DirectoryInfo di = new DirectoryInfo(dir);
+                if (di.Exists)
+                {
+                    throw new ConfigurationException(String.Format("Invalid URI: Directory not found. [uri={0}]", dnode.Location.ToString()));
+                }
+                dnode.Downloaded = true;
+                dnode.Directory = di;
+            }
             parent.AddChildNode(node);
         }
 

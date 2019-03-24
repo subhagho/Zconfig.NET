@@ -222,6 +222,8 @@ namespace LibZConfig.Common.Config.Nodes
     /// </summary>
     public class ConfigResourceZip : ConfigResourceFile
     {
+        public const string CONST_ZIP_FOLDER_NAME = "Archives";
+
         /// <summary>
         /// Local where the content is unzipped.
         /// </summary>
