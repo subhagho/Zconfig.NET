@@ -43,7 +43,9 @@ Creating a sample XML configuration file.
 
 #### Element Types
 __Value Element__:
-`<name>[value]</name>`
+```xml
+<name>[value]</name>
+```
 
 __Properties__: Used for scoped variable replacements
 ```xml
@@ -65,9 +67,9 @@ __Parameters__: Used for auto-wiring method parameters
 ```
 
 __Lists__:
+__Note:__ all list element names should be the same.
 
 *Value Lists*: List of primitive/string values
-__Note:__ all list element names should be the same.
 ```xml
 <list_name>
         <element_name>[value]</element_name>
