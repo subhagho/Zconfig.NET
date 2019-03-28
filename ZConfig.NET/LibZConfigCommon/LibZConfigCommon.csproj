@@ -1,9 +1,30 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RootNamespace>LibZConfig.Common</RootNamespace>
+    <Version>0.1.5-alpha</Version>
+    <PackageProjectUrl>https://github.com/subhagho/Zconfig.NET</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/subhagho/Zconfig.NET</RepositoryUrl>
+    <RepositoryType>github</RepositoryType>
+    <PackageTags>configuration auto-wiring</PackageTags>
+    <NeutralLanguage>en</NeutralLanguage>
+    <PackageLicenseFile>license.txt</PackageLicenseFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Wookler.ZConfig.Common</PackageId>
+    <Description>DotNet port of the ZConfig Configuration Library.
+
+Freatures
+XML/JSON configuration definitions.
+Read from local/remote locations.
+Nested Configuration files (included)
+Auto-wiring of Objects
+Auto-invoke methods during auto-wiring</Description>
+    <Copyright>Subho Ghosh (subho dot ghosh at outlook dot com)</Copyright>
+    <Authors>Subho Ghosh</Authors>
+    <Company>Wookler</Company>
+    <Product>ZConfig</Product>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,6 +32,13 @@
     <PackageReference Include="NLog" Version="4.6.0" />
     <PackageReference Include="NLog.Config" Version="4.6.0" />
     <PackageReference Include="SharpZipLib" Version="1.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="license.txt">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
