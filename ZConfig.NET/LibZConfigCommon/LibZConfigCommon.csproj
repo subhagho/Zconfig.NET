@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>library</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RootNamespace>LibZConfig.Common</RootNamespace>
-    <Version>0.1.5-alpha</Version>
+    <Version>0.1.6.001</Version>
     <PackageProjectUrl>https://github.com/subhagho/Zconfig.NET</PackageProjectUrl>
     <RepositoryUrl>https://github.com/subhagho/Zconfig.NET</RepositoryUrl>
     <RepositoryType>github</RepositoryType>
@@ -15,13 +15,14 @@
     <PackageId>Wookler.ZConfig.Common</PackageId>
     <Description>DotNet port of the ZConfig Configuration Library.
 
-Freatures
-XML/JSON configuration definitions.
-Read from local/remote locations.
-Nested Configuration files (included)
-Auto-wiring of Objects
-Auto-invoke methods during auto-wiring</Description>
-    <Copyright>Subho Ghosh (subho dot ghosh at outlook dot com)</Copyright>
+                Freatures
+                XML/JSON configuration definitions.
+                Read from local/remote locations.
+                Nested Configuration files (included)
+                Auto-wiring of Objects
+                Auto-invoke methods during auto-wiring
+    </Description>
+    <Copyright>Subho Ghosh (subho dot ghosh at outlook dot com), 2019</Copyright>
     <Authors>Subho Ghosh</Authors>
     <Company>Wookler</Company>
     <Product>ZConfig</Product>

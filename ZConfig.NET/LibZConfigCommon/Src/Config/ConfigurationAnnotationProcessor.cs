@@ -219,12 +219,6 @@ namespace LibZConfig.Common.Config
                 if (node != null && node.GetType() == typeof(ConfigPathNode))
                 {
                     target = CreateInstance<T>(type, (ConfigPathNode)node);
-                    if (target == null)
-                    {
-                        throw new AnnotationProcessorException(String.Format("Error creating instance of Type: [path={0}][type={1}]", path.Path, type.FullName));
-                    }
-                    target = ReadValues((ConfigPathNode)node, target);
-                    CallMethodInvokes((ConfigPathNode)node, target);
                 }
             }
             return target;
@@ -240,6 +234,7 @@ namespace LibZConfig.Common.Config
         /// <returns>Created Instance</returns>
         public static object CreateInstance(Type type, ConfigPathNode node)
         {
+            object target = null;
             ConstructorInfo[] constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
             if (constructors != null && constructors.Length > 0)
             {
@@ -268,19 +263,24 @@ namespace LibZConfig.Common.Config
                                     List<object> values = FindParameters(pnode, ci.Name, parameters);
                                     if (values != null && values.Count > 0)
                                     {
-                                        return Activator.CreateInstance(type, values.ToArray());
+                                        target = Activator.CreateInstance(type, values.ToArray());
                                     }
                                 }
                             }
                         }
                         else
                         {
-                            return Activator.CreateInstance(type);
+                            target = Activator.CreateInstance(type);
                         }
                     }
                 }
             }
-            return null;
+            if (target != null)
+            {
+                target = ReadValues((ConfigPathNode)node, target);
+                CallMethodInvokes((ConfigPathNode)node, target);
+            }
+            return target;
         }
 
         /// <summary>
@@ -294,6 +294,7 @@ namespace LibZConfig.Common.Config
         /// <returns>Created Instance</returns>
         public static T CreateInstance<T>(Type type, ConfigPathNode node)
         {
+            T target = default(T);
             ConstructorInfo[] constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
             if (constructors != null && constructors.Length > 0)
             {
@@ -322,19 +323,28 @@ namespace LibZConfig.Common.Config
                                     List<object> values = FindParameters(pnode, ci.Name, parameters);
                                     if (values != null && values.Count > 0)
                                     {
-                                        return (T)Activator.CreateInstance(type, values.ToArray());
+                                        target = (T)Activator.CreateInstance(type, values.ToArray());
                                     }
                                 }
                             }
                         }
                         else
                         {
-                            return Activator.CreateInstance<T>();
+                            target = Activator.CreateInstance<T>();
                         }
                     }
                 }
             }
-            return default(T);
+            if (!target.Equals(default(T)))
+            {
+                target = ReadValues((ConfigPathNode)node, target);
+                CallMethodInvokes((ConfigPathNode)node, target);
+            }
+            else
+            {
+                throw new AnnotationProcessorException(String.Format("Error creating instance of Type: [path={0}][type={1}]", node.GetSearchPath(), type.FullName));
+            }
+            return target;
         }
 
         /// <summary>
