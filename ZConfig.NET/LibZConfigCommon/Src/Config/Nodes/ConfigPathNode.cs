@@ -161,6 +161,21 @@ namespace LibZConfig.Common.Config.Nodes
         }
 
         /// <summary>
+        /// Get the parameter for the specified name, if exists.
+        /// </summary>
+        /// <param name="name">Parameter name</param>
+        /// <returns>Config Value</returns>
+        public ConfigValueNode GetParameter(string name)
+        {
+            ConfigParametersNode node = GetParameters();
+            if (node != null)
+            {
+                return node.GetValue(name);
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Get the defined attributes for this node, if any.
         /// </summary>
         /// <returns>Config Attributes</returns>
@@ -174,6 +189,21 @@ namespace LibZConfig.Common.Config.Nodes
                 {
                     return (ConfigAttributesNode)node;
                 }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Get the attribute for the specified name, if exists.
+        /// </summary>
+        /// <param name="name">Attribute name</param>
+        /// <returns>Config Value</returns>
+        public ConfigValueNode GetAttribute(string name)
+        {
+            ConfigAttributesNode node = GetAttributes();
+            if (node != null)
+            {
+                return node.GetValue(name);
             }
             return null;
         }

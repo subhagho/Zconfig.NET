@@ -134,9 +134,9 @@ namespace LibZConfig.Common.Config.Nodes
         /// Abstract method to be implemented for specifying the error state.
         /// </summary>
         /// <returns>Error state enum</returns>
-        public override ENodeState GetErrorState()
+        public override ENodeState[] GetErrorStates()
         {
-            return ENodeState.Error;
+            return new ENodeState[] { ENodeState.Error };
         }
     }
 
@@ -251,7 +251,7 @@ namespace LibZConfig.Common.Config.Nodes
             if (parts != null && parts.Length > 0)
             {
                 List<string> pList = new List<string>();
-                foreach(string part in parts)
+                foreach (string part in parts)
                 {
                     string npart = ConfigUtils.UnmaskSearchPath(part);
                     pList.Add(npart);

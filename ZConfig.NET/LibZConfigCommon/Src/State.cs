@@ -43,10 +43,11 @@ namespace LibZConfig.Common
         /// <summary>
         /// Set this instance in error state with the specified exception.
         /// </summary>
+        /// <param name="state">Error state to set</param>
         /// <param name="exception">Exception instance.</param>
-        public void SetError(Exception exception)
+        public void SetError(T state, Exception exception)
         {
-            State = GetErrorState();
+            State = state;
             this.exception = exception;
         }
 
@@ -57,7 +58,7 @@ namespace LibZConfig.Common
         /// <returns>Exception instance.</returns>
         public Exception GetError()
         {
-            if (State.Equals(GetErrorState()))
+            if (HasError())
             {
                 return exception;
             }
@@ -70,17 +71,24 @@ namespace LibZConfig.Common
         /// <returns>Has Error?</returns>
         public bool HasError()
         {
-            if (State.Equals(GetErrorState()))
+            T[] states = GetErrorStates();
+            if (states != null)
             {
-                return true;
+                foreach(T state in states)
+                {
+                    if (State.Equals(state))
+                    {
+                        return true;
+                    }
+                }
             }
             return false;
         }
 
         /// <summary>
-        /// Abstract method to be implemented for specifying the error state.
+        /// Abstract method to be implemented for specifying the error state(s).
         /// </summary>
-        /// <returns>Error state enum</returns>
-        public abstract T GetErrorState();
+        /// <returns>Error state(s) enum</returns>
+        public abstract T[] GetErrorStates();
     }
 }

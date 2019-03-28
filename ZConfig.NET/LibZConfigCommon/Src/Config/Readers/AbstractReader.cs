@@ -189,12 +189,12 @@ namespace LibZConfig.Common.Config.Readers
         }
 
         /// <summary>
-        /// Get the error state of this reader.
+        /// Abstract method to be implemented for specifying the error state(s).
         /// </summary>
-        /// <returns>Error state</returns>
-        public override EReaderState GetErrorState()
+        /// <returns>Error state(s) enum</returns>
+        public override EReaderState[] GetErrorStates()
         {
-            return EReaderState.Error;
+            return new EReaderState[] { EReaderState.Error };
         }
     }
 
@@ -259,7 +259,7 @@ namespace LibZConfig.Common.Config.Readers
             if (type != EUriScheme.file)
             {
                 var ex = new ReaderException(String.Format("Invalid URI : [expected={0}][actual={1}]", EUriScheme.file.ToString(), type.ToString()));
-                State.SetError(ex);
+                State.SetError(EReaderState.Error, ex);
                 throw ex;
             }
             filename = location.LocalPath;
@@ -311,7 +311,7 @@ namespace LibZConfig.Common.Config.Readers
             }
             catch (Exception ex)
             {
-                State.SetError(ex);
+                State.SetError(EReaderState.Error, ex);
                 LogUtils.Error(ex);
                 throw ex;
             }
@@ -408,7 +408,7 @@ namespace LibZConfig.Common.Config.Readers
             }
             catch (Exception ex)
             {
-                State.SetError(ex);
+                State.SetError(EReaderState.Error, ex);
                 LogUtils.Error(ex);
                 throw ex;
             }
@@ -525,7 +525,7 @@ namespace LibZConfig.Common.Config.Readers
             }
             catch (Exception ex)
             {
-                State.SetError(ex);
+                State.SetError(EReaderState.Error, ex);
                 LogUtils.Error(ex);
                 throw ex;
             }

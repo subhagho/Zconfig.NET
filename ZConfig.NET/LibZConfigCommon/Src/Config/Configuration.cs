@@ -229,7 +229,7 @@ namespace LibZConfig.Common.Config
         /// <param name="ex">Exception</param>
         public void SetError(Exception ex)
         {
-            configState.SetError(ex);
+            configState.SetError(ENodeState.Error, ex);
         }
 
         /// <summary>
