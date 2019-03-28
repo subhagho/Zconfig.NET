@@ -18,7 +18,8 @@ Creating a sample XML configuration file.
 
 ### Header
 ```xml
-<header ID="[Unique ID]" group="[Application Group]" application="[Application Name]" name="[Config Name]" version="[0.2]">
+<header ID="[Unique ID]" group="[Application Group]" 
+        application="[Application Name]" name="[Config Name]" version="[0.2]">
     <description>[Description - optional]</description>
     <createdBy user="[username]" timestamp="[timestamp]" />
     <updatedBy user="[username]" timestamp="[timestamp]" />
@@ -67,6 +68,7 @@ __Parameters__: Used for auto-wiring method parameters
 ```
 
 __Lists__:
+
 __Note:__ all list element names should be the same.
 
 *Value Lists*: List of primitive/string values
