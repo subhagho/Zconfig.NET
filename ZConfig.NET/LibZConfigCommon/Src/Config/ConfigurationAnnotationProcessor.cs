@@ -235,11 +235,64 @@ namespace LibZConfig.Common.Config
         /// 
         /// Type should have an empty constructor or a constructor with annotation.
         /// </summary>
+        /// <param name="type">Type</param>
+        /// <param name="node">Configuration node.</param>
+        /// <returns>Created Instance</returns>
+        public static object CreateInstance(Type type, ConfigPathNode node)
+        {
+            ConstructorInfo[] constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
+            if (constructors != null && constructors.Length > 0)
+            {
+                foreach (ConstructorInfo ci in constructors)
+                {
+                    MethodInvoke mi = (MethodInvoke)Attribute.GetCustomAttribute(ci, typeof(MethodInvoke));
+                    if (mi != null)
+                    {
+                        ParameterInfo[] parameters = ci.GetParameters();
+                        ConfigPathNode nnode = node;
+                        if (parameters != null && parameters.Length > 0)
+                        {
+                            if (!String.IsNullOrWhiteSpace(mi.Path))
+                            {
+                                AbstractConfigNode cnode = nnode.Find(mi.Path);
+                                if (cnode != null && cnode.GetType() == typeof(ConfigPathNode))
+                                {
+                                    nnode = (ConfigPathNode)cnode;
+                                }
+                            }
+                            if (nnode != null)
+                            {
+                                ConfigParametersNode pnode = nnode.GetParameters();
+                                if (pnode != null)
+                                {
+                                    List<object> values = FindParameters(pnode, ci.Name, parameters);
+                                    if (values != null && values.Count > 0)
+                                    {
+                                        return Activator.CreateInstance(type, values.ToArray());
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return Activator.CreateInstance(type);
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Create a new Instance of the specified type.
+        /// 
+        /// Type should have an empty constructor or a constructor with annotation.
+        /// </summary>
         /// <typeparam name="T">Target Instance type</typeparam>
         /// <param name="type">Type</param>
         /// <param name="node">Configuration node.</param>
         /// <returns>Created Instance</returns>
-        private static T CreateInstance<T>(Type type, ConfigPathNode node)
+        public static T CreateInstance<T>(Type type, ConfigPathNode node)
         {
             ConstructorInfo[] constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
             if (constructors != null && constructors.Length > 0)
