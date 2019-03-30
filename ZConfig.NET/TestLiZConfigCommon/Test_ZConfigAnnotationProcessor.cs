@@ -78,11 +78,50 @@ namespace LibZConfig.Common.Config
         }
 
         [Fact]
+        public void AnnotateDefaultConstructor()
+        {
+            try
+            {
+                EntityDefault entity = new EntityDefault();
+                ConfigurationAnnotationProcessor.Process(ReadConfiguration(), entity);
+                Assert.False(String.IsNullOrWhiteSpace(entity.Attr_3));
+                Assert.False(entity.CreateTime == default(DateTime));
+                Assert.True(entity.DoubleValue > 0);
+                Assert.NotEmpty(entity.GetLongValues());
+                LogUtils.Debug("Entity Default:", entity);
+            }
+            catch (Exception ex)
+            {
+                LogUtils.Error(ex);
+                throw ex;
+            }
+        }
+
+        [Fact]
         public void AnnotateInstance()
         {
             try
             {
                 Entity entity = ConfigurationAnnotationProcessor.Process<Entity>(ReadConfiguration());
+                Assert.False(String.IsNullOrWhiteSpace(entity.Attr_3));
+                Assert.False(entity.CreateTime == default(DateTime));
+                Assert.True(entity.DoubleValue > 0);
+                Assert.NotEmpty(entity.GetLongValues());
+                LogUtils.Debug("Entity:", entity);
+            }
+            catch (Exception ex)
+            {
+                LogUtils.Error(ex);
+                throw ex;
+            }
+        }
+
+        [Fact]
+        public void AnnotateInstanceDefaultConstructor()
+        {
+            try
+            {
+                EntityDefault entity = ConfigurationAnnotationProcessor.Process<EntityDefault>(ReadConfiguration());
                 Assert.False(String.IsNullOrWhiteSpace(entity.Attr_3));
                 Assert.False(entity.CreateTime == default(DateTime));
                 Assert.True(entity.DoubleValue > 0);

@@ -625,5 +625,16 @@ namespace LibZConfig.Common.Utils
             }
             return null;
         }
+
+        /// <summary>
+        /// Check if the value of passed is NULL/Default(T)
+        /// </summary>
+        /// <typeparam name="T">Value Type</typeparam>
+        /// <param name="value">Value</param>
+        /// <returns>Is NULL/Default</returns>
+        public static bool IsNull<T>(T value)
+        {
+            return EqualityComparer<T>.Default.Equals(value, default(T));
+        }
     }
 }

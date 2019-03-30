@@ -4,7 +4,7 @@
     <OutputType>library</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RootNamespace>LibZConfig.Common</RootNamespace>
-    <Version>0.1.6.001</Version>
+    <Version>0.1.6.002</Version>
     <PackageProjectUrl>https://github.com/subhagho/Zconfig.NET</PackageProjectUrl>
     <RepositoryUrl>https://github.com/subhagho/Zconfig.NET</RepositoryUrl>
     <RepositoryType>github</RepositoryType>

@@ -275,6 +275,11 @@ namespace LibZConfig.Common.Config
                     }
                 }
             }
+            
+            if (target == null)
+            {
+                target = Activator.CreateInstance(type);
+            }
             if (target != null)
             {
                 target = ReadValues((ConfigPathNode)node, target);
@@ -324,6 +329,7 @@ namespace LibZConfig.Common.Config
                                     if (values != null && values.Count > 0)
                                     {
                                         target = (T)Activator.CreateInstance(type, values.ToArray());
+                                        break;
                                     }
                                 }
                             }
@@ -331,11 +337,17 @@ namespace LibZConfig.Common.Config
                         else
                         {
                             target = Activator.CreateInstance<T>();
+                            break;
                         }
                     }
                 }
             }
-            if (!target.Equals(default(T)))
+
+            if (ReflectionUtils.IsNull(target))
+            {
+                target = Activator.CreateInstance<T>();
+            }
+            if (!ReflectionUtils.IsNull(target))
             {
                 target = ReadValues((ConfigPathNode)node, target);
                 CallMethodInvokes((ConfigPathNode)node, target);
