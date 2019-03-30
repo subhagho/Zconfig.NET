@@ -154,15 +154,9 @@ namespace LibZConfig.Common.Config.Attributes
                 throw new TransformationException(String.Format("Invalid Tranfsormer Type: [type={0}]", transformerType.FullName));
             }
             object transformer = Activator.CreateInstance(transformerType);
-            if (transformer == null)
-            {
-                throw new TransformationException(String.Format("Error creating Tranfsormer instance: [type={0}]", transformerType.FullName));
-            }
+            Conditions.NotNull(transformer);
             MethodInfo method = transformerType.GetMethod("Transform");
-            if (method == null)
-            {
-                throw new TransformationException(String.Format("Error getting Transform method from instance: [type={0}]", transformerType.FullName));
-            }
+            Conditions.NotNull(method);
             return method.Invoke(transformer, new[] { source });
         }
 
@@ -179,15 +173,9 @@ namespace LibZConfig.Common.Config.Attributes
                 throw new TransformationException(String.Format("Invalid Tranfsormer Type: [type={0}]", transformerType.FullName));
             }
             object transformer = Activator.CreateInstance(transformerType);
-            if (transformer == null)
-            {
-                throw new TransformationException(String.Format("Error creating Tranfsormer instance: [type={0}]", transformerType.FullName));
-            }
+            Conditions.NotNull(transformer);
             MethodInfo method = transformerType.GetMethod("Reverse");
-            if (method == null)
-            {
-                throw new TransformationException(String.Format("Error getting Reverse method from instance: [type={0}]", transformerType.FullName));
-            }
+            Conditions.NotNull(method);
             return method.Invoke(transformer, new[] { source });
         }
     }

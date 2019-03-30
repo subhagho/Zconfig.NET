@@ -103,7 +103,7 @@ namespace LibZConfig.Common.Config
                 {
                     node = configuration.Find(path.Path);
                 }
-                if ((node == null || node.GetType() != typeof(ConfigPathNode)) && path.Required)
+                if ((!Conditions.NotNull(node) || node.GetType() != typeof(ConfigPathNode)) && path.Required)
                 {
                     throw new AnnotationProcessorException(String.Format("Annotation not found: [path={0}][type={1}]", path.Path, type.FullName));
                 }
@@ -137,7 +137,7 @@ namespace LibZConfig.Common.Config
                 {
                     node = parent.Find(path.Path);
                 }
-                if ((node == null || node.GetType() != typeof(ConfigPathNode)) && path.Required)
+                if ((!Conditions.NotNull(node) || node.GetType() != typeof(ConfigPathNode)) && path.Required)
                 {
                     throw new AnnotationProcessorException(String.Format("Annotation not found: [path={0}][type={1}]", path.Path, type.FullName));
                 }
@@ -172,17 +172,14 @@ namespace LibZConfig.Common.Config
                 {
                     node = configuration.Find(path.Path);
                 }
-                if ((node == null || node.GetType() != typeof(ConfigPathNode)) && path.Required)
+                if ((!Conditions.NotNull(node) || node.GetType() != typeof(ConfigPathNode)) && path.Required)
                 {
                     throw new AnnotationProcessorException(String.Format("Annotation not found: [path={0}][type={1}]", path.Path, type.FullName));
                 }
                 if (node != null && node.GetType() == typeof(ConfigPathNode))
                 {
                     target = CreateInstance<T>(type, (ConfigPathNode)node);
-                    if (target == null)
-                    {
-                        throw new AnnotationProcessorException(String.Format("Error creating instance of Type: [path={0}][type={1}]", path.Path, type.FullName));
-                    }
+                    Conditions.NotNull(target);
                     target = ReadValues((ConfigPathNode)node, target);
                     CallMethodInvokes((ConfigPathNode)node, target);
                 }
@@ -212,11 +209,11 @@ namespace LibZConfig.Common.Config
                 {
                     node = parent.Find(path.Path);
                 }
-                if ((node == null || node.GetType() != typeof(ConfigPathNode)) && path.Required)
+                if ((!Conditions.NotNull(node) || node.GetType() != typeof(ConfigPathNode)) && path.Required)
                 {
                     throw new AnnotationProcessorException(String.Format("Annotation not found: [path={0}][type={1}]", path.Path, type.FullName));
                 }
-                if (node != null && node.GetType() == typeof(ConfigPathNode))
+                if (Conditions.NotNull(node) && node.GetType() == typeof(ConfigPathNode))
                 {
                     target = CreateInstance<T>(type, (ConfigPathNode)node);
                 }
@@ -275,7 +272,7 @@ namespace LibZConfig.Common.Config
                     }
                 }
             }
-            
+
             if (target == null)
             {
                 target = Activator.CreateInstance(type);

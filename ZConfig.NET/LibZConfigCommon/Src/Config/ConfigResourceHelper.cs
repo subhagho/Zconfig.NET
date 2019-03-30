@@ -114,10 +114,7 @@ namespace LibZConfig.Common.Config
                     ConfigResourceZip fnode = (ConfigResourceZip)rnode;
                     if (fnode.Downloaded)
                     {
-                        if (fnode.File == null)
-                        {
-                            throw new ConfigurationException(String.Format("Invalid File Resource Node: File is NULL. [path={0}]", fnode.GetSearchPath()));
-                        }
+                        Conditions.NotNull(fnode.File);
                         FileInfo fi = new FileInfo(fnode.File.FullName);
                         if (!fi.Exists)
                         {
@@ -201,10 +198,7 @@ namespace LibZConfig.Common.Config
         {
             using (AbstractReader reader = ReaderTypeHelper.GetReader(fnode.Location))
             {
-                if (reader == null)
-                {
-                    throw new ConfigurationException(String.Format("No reader found for URI. [uri={0}]", fnode.Location.ToString()));
-                }
+                Conditions.NotNull(reader);
                 reader.Open();
                 string f = FileUtils.WriteLocalFile(reader.GetStream(), fnode.ResourceName, fnode.Configuration.Settings.GetTempDirectory());
                 FileInfo fi = new FileInfo(f);
