@@ -74,6 +74,7 @@ namespace LibZConfig.Common.Utils
                 {
                     string aname = assembly.FullName.Split(',')[0];
                     __assemblies[aname] = assembly;
+                    LogUtils.Warn(String.Format("Added Assembly to Cache: [name={0}][path={1}]", name, assemblyFile));
                     return assembly;
                 }
             }

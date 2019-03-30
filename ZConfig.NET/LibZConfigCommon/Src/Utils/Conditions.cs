@@ -25,7 +25,7 @@ namespace LibZConfig.Common.Utils
         /// </summary>
         /// <param name="mesg">Error message</param>
         /// <param name="cause">Cause</param>
-        public ConditionError(string condition,  string mesg, Exception cause) : base(String.Format(__PREFIX, condition, mesg), cause)
+        public ConditionError(string condition, string mesg, Exception cause) : base(String.Format(__PREFIX, condition, mesg), cause)
         {
 
         }
@@ -54,7 +54,7 @@ namespace LibZConfig.Common.Utils
         {
             if (ReflectionUtils.IsNull(value))
             {
-                throw new ConditionError(nameof(NotNull), "Value is NULL or default.");
+                throw new ConditionError(nameof(NotNull), String.Format("[type={0}][default={1}] : Value is NULL or default.", typeof(T).FullName, default(T)));
             }
             return true;
         }
@@ -63,11 +63,11 @@ namespace LibZConfig.Common.Utils
         /// Check string is not NULL/empty.
         /// </summary>
         /// <param name="value">string value</param>
-        public static bool Empty(string value)
+        public static bool EmptyString(string value)
         {
             if (String.IsNullOrWhiteSpace(value))
             {
-                throw new ConditionError(nameof(Empty), "Value is NULL or empty.");
+                throw new ConditionError(nameof(EmptyString), "String Value is NULL or empty.");
             }
             return false;
         }

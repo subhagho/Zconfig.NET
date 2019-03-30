@@ -688,52 +688,55 @@ namespace LibZConfig.Common.Config
             if (node != null)
             {
                 AbstractConfigNode cnode = node.GetChildNode(pname);
-                if (cnode.GetType() == typeof(ConfigValueNode))
+                if (cnode != null)
                 {
-                    ConfigValueNode vn = (ConfigValueNode)cnode;
-                    if (vn != null)
+                    if (cnode.GetType() == typeof(ConfigValueNode))
                     {
-                        value = vn.GetValue();
-                    }
-                    if (!String.IsNullOrWhiteSpace(value))
-                    {
-                        object v = GetValue<T>(pname, value, configValue.Function, property.PropertyType, target, configValue.Required);
-                        if (v != null)
-                            property.SetValue(target, v);
-                    }
-                }
-                else
-                {
-                    if (ReflectionUtils.IsSubclassOfRawGeneric(property.PropertyType, typeof(List<>)))
-                    {
-                        if (cnode.GetType() == typeof(ConfigListValueNode))
+                        ConfigValueNode vn = (ConfigValueNode)cnode;
+                        if (vn != null)
                         {
-                            ConfigListValueNode configList = (ConfigListValueNode)cnode;
-                            List<string> values = configList.GetValueList();
-                            if (values != null)
+                            value = vn.GetValue();
+                        }
+                        if (!String.IsNullOrWhiteSpace(value))
+                        {
+                            object v = GetValue<T>(pname, value, configValue.Function, property.PropertyType, target, configValue.Required);
+                            if (v != null)
+                                property.SetValue(target, v);
+                        }
+                    }
+                    else
+                    {
+                        if (ReflectionUtils.IsSubclassOfRawGeneric(property.PropertyType, typeof(List<>)))
+                        {
+                            if (cnode.GetType() == typeof(ConfigListValueNode))
                             {
-                                Type inner = property.PropertyType.GetGenericArguments()[0];
-                                object v = ReflectionUtils.ConvertListFromStrings(inner, values);
-                                if (v != null)
+                                ConfigListValueNode configList = (ConfigListValueNode)cnode;
+                                List<string> values = configList.GetValueList();
+                                if (values != null)
                                 {
-                                    property.SetValue(target, v);
+                                    Type inner = property.PropertyType.GetGenericArguments()[0];
+                                    object v = ReflectionUtils.ConvertListFromStrings(inner, values);
+                                    if (v != null)
+                                    {
+                                        property.SetValue(target, v);
+                                    }
                                 }
                             }
                         }
-                    }
-                    else if (ReflectionUtils.IsSubclassOfRawGeneric(property.PropertyType, typeof(HashSet<>)))
-                    {
-                        if (cnode.GetType() == typeof(ConfigListValueNode))
+                        else if (ReflectionUtils.IsSubclassOfRawGeneric(property.PropertyType, typeof(HashSet<>)))
                         {
-                            ConfigListValueNode configList = (ConfigListValueNode)cnode;
-                            List<string> values = configList.GetValueList();
-                            if (values != null)
+                            if (cnode.GetType() == typeof(ConfigListValueNode))
                             {
-                                Type inner = property.PropertyType.GetGenericArguments()[0];
-                                object v = ReflectionUtils.ConvertSetFromStrings(inner, values);
-                                if (v != null)
+                                ConfigListValueNode configList = (ConfigListValueNode)cnode;
+                                List<string> values = configList.GetValueList();
+                                if (values != null)
                                 {
-                                    property.SetValue(target, v);
+                                    Type inner = property.PropertyType.GetGenericArguments()[0];
+                                    object v = ReflectionUtils.ConvertSetFromStrings(inner, values);
+                                    if (v != null)
+                                    {
+                                        property.SetValue(target, v);
+                                    }
                                 }
                             }
                         }
