@@ -219,7 +219,7 @@ namespace LibZConfig.Common.Config.Nodes
             if (Parent != null)
             {
                 path = Parent.GetSearchPath();
-                path = string.Format("{0}.{1}", path, Name);
+                path = string.Format("{0}/{1}", path, Name);
             }
             else
             {
@@ -237,22 +237,27 @@ namespace LibZConfig.Common.Config.Nodes
         public virtual AbstractConfigNode Find(string path)
         {
             Contract.Requires(!string.IsNullOrWhiteSpace(path));
-            path = path.Trim();
+
+            path = ConfigUtils.CheckSearchPath(path, this);
             if (path == ".")
             {
                 return this;
             }
-            else if (path.StartsWith('.'))
+            else if (path.StartsWith(ConfigurationSettings.NODE_SEARCH_SEPERATOR))
             {
-                path = string.Format("{0}.{1}", Name, path);
+                return Configuration.Find(path);
             }
             path = ConfigUtils.MaskSearchPath(path);
-            string[] parts = path.Split('.');
+            string[] parts = path.Split(ConfigurationSettings.NODE_SEARCH_SEPERATOR);
             if (parts != null && parts.Length > 0)
             {
                 List<string> pList = new List<string>();
                 foreach (string part in parts)
                 {
+                    if (String.IsNullOrWhiteSpace(part))
+                    {
+                        continue;
+                    }
                     string npart = ConfigUtils.UnmaskSearchPath(part);
                     pList.Add(npart);
                 }
@@ -333,5 +338,19 @@ namespace LibZConfig.Common.Config.Nodes
         /// </summary>
         /// <param name="state">Updated state</param>
         public abstract void UpdateState(ENodeState state);
+
+        protected AbstractConfigNode CheckParentSearch(List<string> path, int index)
+        {
+            string name = path[index];
+            if (name == ConfigurationSettings.NODE_SEARCH_PARENT)
+            {
+                if (Parent != null)
+                {
+                    path[index] = Parent.Name;
+                    return Parent.Find(path, index);
+                }
+            }
+            return null;
+        }
     }
 }

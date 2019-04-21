@@ -69,11 +69,18 @@ namespace LibZConfig.Common.Config
         /// <summary>
         /// Wildcard search tag.
         /// </summary>
-        public static readonly char NODE_SEARCH_WILDCARD = '*';
+        public const char NODE_SEARCH_WILDCARD = '*';
 
-        private static readonly string DEFAULT_PROPERTIES_NODE_NAME = "properties";
-        private static readonly string DEFAULT_ATTRIBUTES_NODE_NAME = "@";
-        private static readonly string DEFAULT_PARAMETERS_NODE_NAME = "parameters";
+        /// <summary>
+        /// Recursive Wildcard search tag.
+        /// </summary>
+        public const string NODE_SEARCH_RECURSIVE_WILDCARD = "**";
+        public const string NODE_SEARCH_PARENT = "..";
+        public const string NODE_SEARCH_SEPERATOR = @"/";
+
+        private const string DEFAULT_PROPERTIES_NODE_NAME = "properties";
+        private const string DEFAULT_ATTRIBUTES_NODE_NAME = "@";
+        private const string DEFAULT_PARAMETERS_NODE_NAME = "parameters";
 
         /// <summary>
         /// Node name for properties nodes.

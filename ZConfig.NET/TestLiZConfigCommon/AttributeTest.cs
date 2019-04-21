@@ -5,15 +5,15 @@ using LibZConfig.Common.Utils;
 
 namespace LibZConfig.Common.Config
 {
-    [ConfigPath(Path ="root.configuration.node_1")]
+    [ConfigPath(Path ="root/configuration/node_1")]
     public class Entity
     {
         public string Param_1 { get; }
         [ConfigValue(Name = "timestamp", Path = "createdBy", Function = typeof(StringToDateTransformer))]
         public DateTime CreateTime { get; set; }
-        [ConfigValue(Name = "LONG_VALUE_LIST", Path = "node_2.node_3.node_4")]
+        [ConfigValue(Name = "LONG_VALUE_LIST", Path = "node_2/node_3/node_4")]
         private HashSet<long> longValues;
-        [ConfigAttribute(Name = "ATTR_3", Path ="node_2.node_3")]
+        [ConfigAttribute(Name = "ATTR_3", Path ="node_2/node_3")]
         public string Attr_3 { get; set; }
         public double DoubleValue { get; set; }
 
@@ -38,7 +38,7 @@ namespace LibZConfig.Common.Config
             return longValues;
         }
 
-        [MethodInvoke(Path = "node_2.node_3.node_4")]
+        [MethodInvoke(Path = "node_2/node_3/node_4")]
         public void SetDoubleValue([ConfigParam(Path = "node_4", Name = "PARAM_3")]double value)
         {
             DoubleValue = value;
@@ -46,15 +46,15 @@ namespace LibZConfig.Common.Config
         }
     }
 
-    [ConfigPath(Path = "root.configuration.node_1")]
+    [ConfigPath(Path = "root/configuration/node_1")]
     public class EntityDefault
     {
         public string Param_1 { get; }
         [ConfigValue(Name = "timestamp", Path = "createdBy", Function = typeof(StringToDateTransformer))]
         public DateTime CreateTime { get; set; }
-        [ConfigValue(Name = "LONG_VALUE_LIST", Path = "node_2.node_3.node_4")]
+        [ConfigValue(Name = "LONG_VALUE_LIST", Path = "node_2/node_3/node_4")]
         private HashSet<long> longValues;
-        [ConfigAttribute(Name = "ATTR_3", Path = "node_2.node_3")]
+        [ConfigAttribute(Name = "ATTR_3", Path = "node_2/node_3")]
         public string Attr_3 { get; set; }
         public double DoubleValue { get; set; }
 
@@ -73,7 +73,7 @@ namespace LibZConfig.Common.Config
             return longValues;
         }
 
-        [MethodInvoke(Path = "node_2.node_3.node_4")]
+        [MethodInvoke(Path = "node_2/node_3/node_4")]
         public void SetDoubleValue([ConfigParam(Path = "node_4", Name = "PARAM_3")]double value)
         {
             DoubleValue = value;

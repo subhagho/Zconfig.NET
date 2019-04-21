@@ -83,8 +83,8 @@ namespace LibZConfig.Common.Config.Nodes
             node.Parent = this;
             if (!typeof(ConfigResourceNode).IsAssignableFrom(node.GetType()))
             {
-               children[node.Name] = node;
-            } 
+                children[node.Name] = node;
+            }
             else
             {
                 ConfigResourceNode rnode = (ConfigResourceNode)node;
@@ -234,6 +234,11 @@ namespace LibZConfig.Common.Config.Nodes
         /// <returns>Configuration Node</returns>
         public override AbstractConfigNode Find(List<string> path, int index)
         {
+            AbstractConfigNode sn = CheckParentSearch(path, index);
+            if (sn != null)
+            {
+                return sn;
+            }
             string name = path[index];
             ResolvedName resolved = ConfigUtils.ResolveName(name, Name, Configuration.Settings);
             if (resolved == null)
@@ -244,7 +249,10 @@ namespace LibZConfig.Common.Config.Nodes
                     {
                         return this;
                     }
-                    return FindChild(path, index);
+                    else
+                    {
+                        return FindChild(path, index);
+                    }
                 }
                 else if (index == 0)
                 {
@@ -295,6 +303,14 @@ namespace LibZConfig.Common.Config.Nodes
         private AbstractConfigNode FindChild(List<string> path, int index)
         {
             string name = path[index + 1];
+            if (name == ConfigurationSettings.NODE_SEARCH_PARENT)
+            {
+                if (Parent != null)
+                {
+                    path[index + 1] = Parent.Name;
+                    return Parent.Find(path, index + 1);
+                }
+            }
             if (name.Length == 1 && name[0] == ConfigurationSettings.NODE_SEARCH_WILDCARD)
             {
                 if (index == (path.Count - 2))
@@ -356,7 +372,17 @@ namespace LibZConfig.Common.Config.Nodes
             else
             {
                 name = resolved.Name;
-                if (children.ContainsKey(name))
+                if (name == Name)
+                {
+                    if (!String.IsNullOrWhiteSpace(resolved.AbbrReplacement))
+                    {
+                        if (children.ContainsKey(resolved.AbbrReplacement))
+                        {
+                            return children[resolved.AbbrReplacement].Find(path, index + 1);
+                        }
+                    }
+                }
+                else if (children.ContainsKey(name))
                 {
                     return children[name].Find(path, index + 1);
                 }

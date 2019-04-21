@@ -12,7 +12,7 @@
     <NeutralLanguage>en</NeutralLanguage>
     <PackageLicenseFile>license.txt</PackageLicenseFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageId>Wookler.ZConfig.Common</PackageId>
+    <PackageId>CodeKutter.ZConfig.Common</PackageId>
     <Description>DotNet port of the ZConfig Configuration Library.
 
                 Freatures
@@ -24,7 +24,7 @@
     </Description>
     <Copyright>Subho Ghosh (subho dot ghosh at outlook dot com), 2019</Copyright>
     <Authors>Subho Ghosh</Authors>
-    <Company>Wookler</Company>
+    <Company>CodeKutter</Company>
     <Product>ZConfig</Product>
   </PropertyGroup>
 

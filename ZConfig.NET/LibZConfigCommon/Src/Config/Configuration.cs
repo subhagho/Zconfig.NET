@@ -288,6 +288,10 @@ namespace LibZConfig.Common.Config
         public AbstractConfigNode Find(string path)
         {
             Contract.Requires(!String.IsNullOrWhiteSpace(path));
+            if (path.StartsWith(ConfigurationSettings.NODE_SEARCH_SEPERATOR))
+            {
+                path = path.Substring(1);
+            }
             return RootConfigNode.Find(path);
         }
 

@@ -259,6 +259,11 @@ namespace LibZConfig.Common.Config.Nodes
         /// <returns>Configuration Node</returns>
         public override AbstractConfigNode Find(List<string> path, int index)
         {
+            AbstractConfigNode psn = CheckParentSearch(path, index);
+            if (psn != null)
+            {
+                return psn;
+            }
             string name = path[index];
             if (name.Length == 1 && name[0] == ConfigurationSettings.NODE_SEARCH_WILDCARD)
             {
@@ -375,6 +380,14 @@ namespace LibZConfig.Common.Config.Nodes
                 if (name == Name && index == (path.Count - 1))
                 {
                     return this;
+                } else
+                {
+                    string cname = path[index + 1];
+                    if (cname == ConfigurationSettings.NODE_SEARCH_PARENT)
+                    {
+                        path[index + 1] = Parent.Name;
+                        return Parent.Find(path, index + 1);
+                    }
                 }
             }
             else

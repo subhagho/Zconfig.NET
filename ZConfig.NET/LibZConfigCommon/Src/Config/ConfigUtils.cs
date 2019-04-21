@@ -26,7 +26,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Text.RegularExpressions;
 using LibZConfig.Common.Config.Nodes;
 
 namespace LibZConfig.Common.Config
@@ -59,6 +59,9 @@ namespace LibZConfig.Common.Config
     /// </summary>
     public static class ConfigUtils
     {
+        private const string ARRAY_INDEX_REGEX = "^(\\w*)\\[(\\d*)\\]$";
+        private static Regex ARRAY_INDEX_RE = new Regex(ARRAY_INDEX_REGEX);
+
         public static void CheckSearchRoot(List<string> path, string name, ConfigurationSettings settings)
         {
             if (path.Count > 0)
@@ -78,9 +81,12 @@ namespace LibZConfig.Common.Config
                     {
                         nname = String.Format("{0}{1}", resolved.Name, resolved.Abbr);
                     }
-                    else
+                    else if (!String.IsNullOrWhiteSpace(resolved.ChildName))
                     {
-                        nname = String.Format("{0}{1}{2}", resolved.Name, resolved.Abbr, resolved.ChildName);
+                        if (resolved.Abbr != '\0')
+                        {
+                            nname = String.Format("{0}{1}{2}", resolved.Name, resolved.Abbr, resolved.ChildName);
+                        }
                     }
                     path[0] = nname;
                 }
@@ -110,6 +116,19 @@ namespace LibZConfig.Common.Config
             else if (name.Contains(ConfigListNode<ConfigValueNode>.NODE_ABBREVIATION))
             {
                 return ResolveName(name, nodeName, ConfigListNode<ConfigValueNode>.NODE_ABBREVIATION, settings);
+            }
+            else if (ARRAY_INDEX_RE.IsMatch(name))
+            {
+                MatchCollection mc = ARRAY_INDEX_RE.Matches(name);
+                if (mc != null && mc.Count > 0 && mc[0].Groups != null && mc[0].Groups.Count > 1)
+                {
+                    ResolvedName resolved = new ResolvedName();
+                    resolved.AbbrReplacement = ConfigListNode<ConfigValueNode>.NODE_NAME;
+                    resolved.Name = mc[0].Groups[1].Value;
+                    resolved.ChildName = mc[0].Groups[2].Value;
+
+                    return resolved;
+                }
             }
             else if (name.Length == 1 && name[0] == ConfigurationSettings.NODE_SEARCH_WILDCARD)
             {
@@ -174,8 +193,31 @@ namespace LibZConfig.Common.Config
             return resolved;
         }
 
+        public static string CheckSearchPath(string path, AbstractConfigNode node)
+        {
+            path = path.Trim();
+           if (path.StartsWith('.'))
+            {
+                if (path.StartsWith(ConfigurationSettings.NODE_SEARCH_PARENT))
+                {
+                    path = string.Format("{0}/{1}", node.Name, path);
+                }
+                else
+                {
+                    path = path.Substring(1);
+                    path = string.Format("{0}/{1}", node.Name, path);
+                }
+            }
+            return path;
+        }
+
         public static string MaskSearchPath(string path)
         {
+            if (ARRAY_INDEX_RE.IsMatch(path))
+            {
+                return path;
+            }
+
             int si = path.IndexOf('[');
             if (si >= 0)
             {
@@ -192,7 +234,7 @@ namespace LibZConfig.Common.Config
 
                     if (s1.Contains('.'))
                     {
-                        s1 = s1.Replace(@".", @"###");
+                        s1 = s1.Replace(ConfigurationSettings.NODE_SEARCH_SEPERATOR, @"###");
                         if (s1 != null)
                             path = String.Format("{0}{1}{2}", s0, s1, s2);
                         else
@@ -205,7 +247,12 @@ namespace LibZConfig.Common.Config
 
         public static string UnmaskSearchPath(string path)
         {
-            path = path.Replace(@"###", @".");
+            if (ARRAY_INDEX_RE.IsMatch(path))
+            {
+                return path;
+            }
+
+            path = path.Replace(@"###", ConfigurationSettings.NODE_SEARCH_SEPERATOR);
             path = path.Replace("[", "");
             path = path.Replace("]", "");
 

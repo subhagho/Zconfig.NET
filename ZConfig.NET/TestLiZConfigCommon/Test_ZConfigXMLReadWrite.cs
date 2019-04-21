@@ -44,7 +44,7 @@ namespace LibZConfig.Common.Config
                     reader.Open();
                     XmlConfigParser parser = new XmlConfigParser();
                     ConfigurationSettings settings = new ConfigurationSettings();
-                    
+
                     settings.DownloadOptions = EDownloadOptions.LoadRemoteResourcesOnStartup;
 
                     parser.Parse(cname, reader, Version.Parse(version), settings);
@@ -119,7 +119,7 @@ namespace LibZConfig.Common.Config
                 Configuration configuration = ReadConfiguration();
 
                 Assert.NotNull(configuration);
-                string path = "root.configuration.node_1";
+                string path = "root/configuration/node_1";
                 AbstractConfigNode node = configuration.Find(path);
                 Assert.NotNull(node);
                 Assert.Equal(path, node.GetSearchPath());
@@ -146,7 +146,7 @@ namespace LibZConfig.Common.Config
                 Configuration configuration = ReadConfiguration();
 
                 Assert.NotNull(configuration);
-                String path = "root.configuration.node_1#";
+                String path = "root/configuration/node_1#";
                 AbstractConfigNode node = configuration.Find(path);
                 Assert.NotNull(node);
                 Assert.True(node.GetType() == typeof(ConfigParametersNode));
@@ -159,8 +159,8 @@ namespace LibZConfig.Common.Config
                 LogUtils.Debug(
                       String.Format("[path={0}] parameter value = {1}", path, param));
 
-                path = "root.configuration.node_1.node_2#PARAM_1";
-                node = configuration.Find(path);
+                path = "/root/configuration/node_1/node_2#PARAM_1";
+                node = node.Find(path);
                 Assert.NotNull(node);
                 Assert.True(node.GetType() == typeof(ConfigValueNode));
                 LogUtils.Debug("NODE>>", node);
@@ -181,7 +181,7 @@ namespace LibZConfig.Common.Config
                 Configuration configuration = ReadConfiguration();
 
                 Assert.NotNull(configuration);
-                String path = "root.configuration.node_1.node_2";
+                String path = "root/configuration/node_1/node_2";
                 AbstractConfigNode node = configuration.Find(path);
                 Assert.NotNull(node);
                 Assert.True(node.GetType() == typeof(ConfigPathNode));
@@ -195,13 +195,19 @@ namespace LibZConfig.Common.Config
                 LogUtils.Debug(
                       String.Format("[path={0}] attribute value = {1}", path, param));
 
-                path = "root.configuration.node_1.node_2.node_3@ATTR_2";
+                path = "root/configuration/node_1/node_2/node_3@ATTR_2";
                 node = configuration.Find(path);
                 Assert.NotNull(node);
                 Assert.True(node.GetType() == typeof(ConfigValueNode));
 
-                path = "root.configuration.node_1.node_2.node_3@";
+                path = "root/configuration/node_1/node_2/node_3@";
                 node = configuration.Find(path);
+                Assert.NotNull(node);
+                Assert.True(node.GetType() == typeof(ConfigAttributesNode));
+                LogUtils.Debug("NODE>>", node);
+
+                path = "/root/configuration/node_1/node_2/node_3/@";
+                node = node.Find(path);
                 Assert.NotNull(node);
                 Assert.True(node.GetType() == typeof(ConfigAttributesNode));
                 LogUtils.Debug("NODE>>", node);
@@ -222,11 +228,11 @@ namespace LibZConfig.Common.Config
                 Configuration configuration = ReadConfiguration();
 
                 Assert.NotNull(configuration);
-                string path = "root.configuration.node_1.node_2.node_3.*";
+                string path = "root/configuration/node_1/node_2/node_3/*";
                 AbstractConfigNode node = configuration.Find(path);
                 Assert.NotNull(node);
                 Assert.True(node.GetType() == typeof(ConfigSearchResult));
-                path = "configuration.node_1.node_2.node_3.*.LONG_VALUE_LIST";
+                path = "configuration/node_1/node_2/node_3/*/LONG_VALUE_LIST";
                 node = configuration.Find(path);
                 Assert.NotNull(node);
                 Assert.True(node.GetType() == typeof(ConfigListValueNode));
@@ -249,14 +255,46 @@ namespace LibZConfig.Common.Config
                 Configuration configuration = ReadConfiguration();
 
                 Assert.NotNull(configuration);
-                string path = "root.configuration.node_1.ELEMENT_LIST";
+                string path = "root/configuration/node_1/ELEMENT_LIST";
                 AbstractConfigNode node = configuration.Find(path);
                 Assert.NotNull(node);
                 Assert.Equal(path, node.GetSearchPath());
-                path = "ELEMENT_LIST%2.string_2";
+
+                path = "ELEMENT_LIST[3]";
+                AbstractConfigNode nnode = node.Find(path);
+                Assert.NotNull(nnode);
+                Assert.True(nnode.GetType() == typeof(ConfigPathNode));
+                LogUtils.Debug(nnode.GetAbsolutePath());
+
+                path = "ELEMENT_LIST[2]/string_2";
                 node = node.Find(path);
                 Assert.NotNull(node);
                 Assert.True(node.GetType() == typeof(ConfigValueNode));
+                LogUtils.Debug(node.GetAbsolutePath());
+            }
+            catch (Exception ex)
+            {
+                LogUtils.Error(ex);
+                throw ex;
+            }
+        }
+
+        [Fact]
+        public void SearchParent()
+        {
+            try
+            {
+                Configuration configuration = ReadConfiguration();
+
+                Assert.NotNull(configuration);
+                string path = "root/configuration/node_1/ELEMENT_LIST";
+                AbstractConfigNode node = configuration.Find(path);
+                Assert.NotNull(node);
+                Assert.Equal(path, node.GetSearchPath());
+                path = "../node_2/node_3/../#";
+                node = node.Find(path);
+                Assert.NotNull(node);
+                Assert.True(node.GetType() == typeof(ConfigParametersNode));
                 LogUtils.Debug(node.GetAbsolutePath());
             }
             catch (Exception ex)
@@ -274,7 +312,7 @@ namespace LibZConfig.Common.Config
                 Configuration configuration = ReadConfiguration();
 
                 Assert.NotNull(configuration);
-                string path = "root.configuration.node_1.node_2.node_3.[data/LICENSE.txt]";
+                string path = "root/configuration/node_1/node_2/node_3/[data/LICENSE.txt]";
                 AbstractConfigNode node = configuration.Find(path);
                 Assert.NotNull(node);
                 Assert.True(typeof(ConfigResourceNode).IsAssignableFrom(node.GetType()));

@@ -241,6 +241,12 @@ namespace LibZConfig.Common.Config.Nodes
         /// <returns>Child node</returns>
         protected AbstractConfigNode Find(List<string> path, int index, char abbr)
         {
+            AbstractConfigNode sn = CheckParentSearch(path, index);
+            if (sn != null)
+            {
+                return sn;
+            }
+
             string name = path[index];
             if (name.Length == 1 && name[0] == abbr)
             {
@@ -419,6 +425,15 @@ namespace LibZConfig.Common.Config.Nodes
         /// <returns>Config node instance</returns>
         public override AbstractConfigNode Find(string path)
         {
+            path = ConfigUtils.CheckSearchPath(path, this);
+            if (path == ".")
+            {
+                return this;
+            }
+            else if (path.StartsWith(ConfigurationSettings.NODE_SEARCH_SEPERATOR))
+            {
+                return Configuration.Find(path);
+            }
             return Find(path, NODE_ABBREVIATION);
         }
 

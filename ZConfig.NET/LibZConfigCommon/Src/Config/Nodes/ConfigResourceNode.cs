@@ -150,6 +150,11 @@ namespace LibZConfig.Common.Config.Nodes
         /// <returns>Configuration Node</returns>
         public override AbstractConfigNode Find(List<string> path, int index)
         {
+            AbstractConfigNode sn = CheckParentSearch(path, index);
+            if (sn != null)
+            {
+                return sn;
+            }
             string name = path[index];
             if (name == ResourceName && index == (path.Count - 1))
             {
