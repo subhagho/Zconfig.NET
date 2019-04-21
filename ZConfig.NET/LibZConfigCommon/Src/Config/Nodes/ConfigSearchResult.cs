@@ -34,14 +34,34 @@ namespace LibZConfig.Common.Config.Nodes
     {
         public override AbstractConfigNode Find(string path)
         {
-            string[] parts = path.Split('.');
+            path = ConfigUtils.CheckSearchPath(path, this);
+            if (path == ".")
+            {
+                return this;
+            }
+            else if (path.StartsWith(ConfigurationSettings.NODE_SEARCH_SEPERATOR))
+            {
+                return Configuration.Find(path);
+            }
+            path = ConfigUtils.MaskSearchPath(path);
+            string[] parts = path.Split(ConfigurationSettings.NODE_SEARCH_SEPERATOR);
             if (parts != null && parts.Length > 0)
             {
-                List<string> stack = new List<string>(parts);
+                List<string> pList = new List<string>();
+                foreach (string part in parts)
+                {
+                    if (String.IsNullOrWhiteSpace(part))
+                    {
+                        continue;
+                    }
+                    string npart = ConfigUtils.UnmaskSearchPath(part);
+                    pList.Add(npart);
+                }
+                ConfigUtils.CheckSearchRoot(pList, Name, Configuration.Settings);
                 List<AbstractConfigNode> nodes = new List<AbstractConfigNode>();
                 foreach (AbstractConfigNode node in GetValues())
                 {
-                    AbstractConfigNode sn = node.Find(stack, 0);
+                    AbstractConfigNode sn = node.Find(pList, 0);
                     if (sn != null)
                     {
                         nodes.Add(sn);

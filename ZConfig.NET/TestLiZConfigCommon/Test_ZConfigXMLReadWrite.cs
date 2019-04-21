@@ -174,6 +174,33 @@ namespace LibZConfig.Common.Config
         }
 
         [Fact]
+        public void SearchRecursive()
+        {
+            try
+            {
+                Configuration configuration = ReadConfiguration();
+
+                Assert.NotNull(configuration);
+                String path = "root/**/updatedBy";
+                AbstractConfigNode node = configuration.Find(path);
+                Assert.NotNull(node);
+                Assert.True(node.GetType() == typeof(ConfigSearchResult));
+
+                path = "/**/node_2/#PARAM_1";
+                node = node.Find(path);
+                Assert.NotNull(node);
+                Assert.True(node.GetType() == typeof(ConfigValueNode));
+                LogUtils.Debug("NODE>>", node);
+
+            }
+            catch (Exception ex)
+            {
+                LogUtils.Error(ex);
+                throw ex;
+            }
+        }
+
+        [Fact]
         public void SearchAttributes()
         {
             try

@@ -240,6 +240,40 @@ namespace LibZConfig.Common.Config.Nodes
                 return sn;
             }
             string name = path[index];
+            if (name == ConfigurationSettings.NODE_SEARCH_RECURSIVE_WILDCARD)
+            {
+                string cname = path[index + 1];
+                if (children.Count > 0)
+                {
+                    List<AbstractConfigNode> nodes = new List<AbstractConfigNode>();
+                    if (children.ContainsKey(cname))
+                    {
+                        AbstractConfigNode node = children[cname].Find(path, index + 1);
+                        nodes.Add(node);
+                    }
+
+                    foreach (string key in children.Keys)
+                    {
+                        AbstractConfigNode cnode = children[key].Find(path, index);
+                        if (cnode != null)
+                        {
+                            nodes.Add(cnode);
+                        }
+                    }
+
+                    if (nodes.Count == 1)
+                    {
+                        return nodes[0];
+                    }
+                    else if (nodes.Count > 1)
+                    {
+                        ConfigSearchResult result = new ConfigSearchResult();
+                        result.Configuration = Configuration;
+                        result.AddAll(nodes);
+                        return result;
+                    }
+                }
+            }
             ResolvedName resolved = ConfigUtils.ResolveName(name, Name, Configuration.Settings);
             if (resolved == null)
             {
@@ -364,9 +398,33 @@ namespace LibZConfig.Common.Config.Nodes
             ResolvedName resolved = ConfigUtils.ResolveName(name, Name, Configuration.Settings);
             if (resolved == null)
             {
+                List<AbstractConfigNode> nodes = new List<AbstractConfigNode>();
                 if (children.ContainsKey(name))
                 {
                     return children[name].Find(path, index + 1);
+                }
+                else if (name == ConfigurationSettings.NODE_SEARCH_RECURSIVE_WILDCARD)
+                {
+                    foreach (string key in children.Keys)
+                    {
+                        AbstractConfigNode cnode = children[key].Find(path, index + 1);
+                        if (cnode != null)
+                        {
+                            nodes.Add(cnode);
+                        }
+                    }
+
+                }
+                if (nodes.Count == 1)
+                {
+                    return nodes[0];
+                }
+                else if (nodes.Count > 1)
+                {
+                    ConfigSearchResult result = new ConfigSearchResult();
+                    result.Configuration = Configuration;
+                    result.AddAll(nodes);
+                    return result;
                 }
             }
             else
