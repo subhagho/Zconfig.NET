@@ -244,6 +244,7 @@ namespace LibZConfig.Common.Config.Parsers
         /// <param name="reader">Reader handle to read the configuration</param>
         /// <param name="version">Expected Version of the configuration</param>
         /// <param name="settings">Configuration Settings to use</param>
-        public abstract void Parse(string name, AbstractReader reader, Version version, ConfigurationSettings settings);
+        /// <param name="password">Decryption Password (if required)</param>
+        public abstract void Parse(string name, AbstractReader reader, Version version, ConfigurationSettings settings, string password = null);
     }
 }

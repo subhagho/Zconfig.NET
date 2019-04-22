@@ -149,6 +149,14 @@ namespace LibZConfig.Common.Config
         /// Confgiuration last updated by
         /// </summary>
         public ModifiedBy ModifiedBy { get; set; }
+        /// <summary>
+        /// Hashed Encryption Key
+        /// </summary>
+        public string EncryptionHash { get; set; }
+        /// <summary>
+        /// Configuration Load Timestamp.
+        /// </summary>
+        public long Timestamp { get; set; }
     }
 
     /// <summary>

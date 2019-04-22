@@ -93,6 +93,10 @@ namespace LibZConfig.Common.Config.Parsers
         /// </summary>
         public const string XML_CONFIG_HEADER_ATTR_VERSION = "version";
         /// <summary>
+        /// XML Attribute: Password Hash
+        /// </summary>
+        public const string XML_CONFIG_HEADER_ATTR_HASH = "passwordHash";
+        /// <summary>
         /// XML Node: Created By
         /// </summary>
         public const string XML_CONFIG_HEADER_CREATED_BY = "createdBy";
@@ -149,7 +153,8 @@ namespace LibZConfig.Common.Config.Parsers
         /// <param name="reader">Configuration Data reader</param>
         /// <param name="version">Expected configuration version</param>
         /// <param name="settings">Configuration Settings</param>
-        public override void Parse(string name, AbstractReader reader, Version version, ConfigurationSettings settings)
+        /// <param name="password">Decryption Password (if required)</param>
+        public override void Parse(string name, AbstractReader reader, Version version, ConfigurationSettings settings, string password = null)
         {
             if (settings == null)
             {
@@ -164,7 +169,7 @@ namespace LibZConfig.Common.Config.Parsers
                 doc.Load(reader.GetStream());
 
                 XmlElement root = doc.DocumentElement;
-                ParseRootNode(name, version, root);
+                ParseRootNode(name, version, root, password);
 
                 PostLoad(settings.ReplaceProperties);
 
@@ -184,7 +189,7 @@ namespace LibZConfig.Common.Config.Parsers
         /// <param name="name">Configuration Name</param>
         /// <param name="version">Expected Configuration Version</param>
         /// <param name="root">XML Document node</param>
-        private void ParseRootNode(string name, Version version, XmlElement root)
+        private void ParseRootNode(string name, Version version, XmlElement root, string password)
         {
             Stack<AbstractConfigNode> nodeStack = new Stack<AbstractConfigNode>();
             configuration.RootConfigNode = new ConfigPathNode(configuration, null);
@@ -196,7 +201,7 @@ namespace LibZConfig.Common.Config.Parsers
                 {
                     if (elem.Name == ConstXmlConfigHeader.XML_CONFIG_NODE_HEADER && elem.NodeType == XmlNodeType.Element)
                     {
-                        ParseHeader(name, version, (XmlElement)elem);
+                        ParseHeader(name, version, (XmlElement)elem, password);
                     }
                     else if (elem.NodeType == XmlNodeType.Element)
                     {
@@ -390,7 +395,7 @@ namespace LibZConfig.Common.Config.Parsers
             Uri uri = null;
             if (elem.HasChildNodes)
             {
-                foreach(XmlNode nn in elem.ChildNodes)
+                foreach (XmlNode nn in elem.ChildNodes)
                 {
                     if (nn.NodeType == XmlNodeType.Element && nn.Name == ConstXmlResourceNode.XML_CONFIG_NODE_RESOURCE_URL)
                     {
@@ -404,13 +409,13 @@ namespace LibZConfig.Common.Config.Parsers
                     }
                 }
             }
-            
+
             if (uri == null)
             {
                 throw ConfigurationException.PropertyMissingException(ConstXmlResourceNode.XML_CONFIG_NODE_RESOURCE_URL);
             }
             ConfigResourceNode node = null;
-            switch(type)
+            switch (type)
             {
                 case EResourceType.FILE:
                     node = new ConfigResourceFile(configuration, parent);
@@ -434,7 +439,7 @@ namespace LibZConfig.Common.Config.Parsers
                     ConfigResourceHelper.DownloadResource(fnode);
                 }
             }
-            
+
             if (type == EResourceType.DIRECTORY)
             {
                 ConfigDirectoryResource dnode = (ConfigDirectoryResource)node;
@@ -554,7 +559,7 @@ namespace LibZConfig.Common.Config.Parsers
         /// <param name="name">Configuration name</param>
         /// <param name="version">Expected configuration version</param>
         /// <param name="elem">Header XML element</param>
-        private void ParseHeader(string name, Version version, XmlElement elem)
+        private void ParseHeader(string name, Version version, XmlElement elem, string passwrod)
         {
             if (elem.HasAttributes)
             {
@@ -593,6 +598,19 @@ namespace LibZConfig.Common.Config.Parsers
                 {
                     throw new ConfigurationException(String.Format("Invalid Configuration: Name mis-match. [expected={0}][actual={1}]", name, header.Name));
                 }
+                attr = elem.GetAttribute(ConstXmlConfigHeader.XML_CONFIG_HEADER_ATTR_HASH);
+                if (!String.IsNullOrWhiteSpace(attr))
+                {
+                    header.EncryptionHash = attr;
+                    if (String.IsNullOrWhiteSpace(passwrod))
+                    {
+                        throw new ConfigurationException(String.Format("Configuration has encryption, but no password specified. [name={0}]", header.Name));
+                    }
+                    if (!CryptoUtils.CompareHash(header.EncryptionHash, passwrod))
+                    {
+                        throw new ConfigurationException(String.Format("Password doesn't match the hash specified in the configuration. [name={0}]", header.Name));
+                    }
+                }
                 if (elem.HasChildNodes)
                 {
                     foreach (XmlNode node in elem.ChildNodes)
@@ -625,6 +643,7 @@ namespace LibZConfig.Common.Config.Parsers
                         }
                     }
                 }
+                header.Timestamp = DateTime.Now.Ticks;
                 LogUtils.Debug(String.Format("Loaded Header: [name={0}]", header.Name), header);
                 configuration.Header = header;
             }

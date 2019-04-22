@@ -35,7 +35,7 @@ namespace LibZConfig.Common.Config.Parsers
 {
     public class JSONConfigParser : AbstractConfigParser
     {
-        public override void Parse(string name, AbstractReader reader, Version version, ConfigurationSettings settings)
+        public override void Parse(string name, AbstractReader reader, Version version, ConfigurationSettings settings, string passwrod = null)
         {
             if (settings == null)
             {

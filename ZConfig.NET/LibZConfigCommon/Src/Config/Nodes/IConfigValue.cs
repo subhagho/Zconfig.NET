@@ -41,5 +41,11 @@ namespace LibZConfig.Common.Config.Nodes
         /// </summary>
         /// <returns>Node Value</returns>
         T GetValue();
+
+        /// <summary>
+        /// Check if this value node is encrypted.
+        /// </summary>
+        /// <returns>Is Encrypted?</returns>
+        bool IsEncrypted();
     }
 }

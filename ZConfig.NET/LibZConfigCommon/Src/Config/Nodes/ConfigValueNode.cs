@@ -41,6 +41,11 @@ namespace LibZConfig.Common.Config.Nodes
         private string value;
 
         /// <summary>
+        /// Is this value node encrypted?
+        /// </summary>
+        public bool Encrypted { get; set; }
+
+        /// <summary>
         /// Default Empty constructor
         /// </summary>
         public ConfigValueNode() : base()
@@ -99,6 +104,15 @@ namespace LibZConfig.Common.Config.Nodes
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Check if this value node is encrypted.
+        /// </summary>
+        /// <returns>Is Encrypted?</returns>
+        public bool IsEncrypted()
+        {
+            return Encrypted;
         }
 
         /// <summary>
