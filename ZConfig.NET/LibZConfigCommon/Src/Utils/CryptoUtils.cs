@@ -194,6 +194,9 @@ namespace LibZConfig.Common.Utils
 
     /// <summary>
     /// Local Vault to store configuration passwords in an encrypted form.
+    /// 
+    /// TODO: Temporary solution for storing passwords in memory. Need to explore 
+    /// a better option.
     /// </summary>
     public class ConfigVault
     {

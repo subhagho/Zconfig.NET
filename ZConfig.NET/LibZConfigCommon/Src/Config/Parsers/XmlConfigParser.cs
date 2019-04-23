@@ -173,6 +173,10 @@ namespace LibZConfig.Common.Config.Parsers
 
                 PostLoad(settings.ReplaceProperties);
 
+                if (!String.IsNullOrWhiteSpace(password))
+                {
+
+                }
                 LogUtils.Debug(String.Format("Configuration Loaded: [name={0}]", configuration.Header.Name), configuration);
             }
             catch (Exception ex)
