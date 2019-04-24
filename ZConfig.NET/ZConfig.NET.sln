@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibZConfigCommon", "LibZCon
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestLibZConfigCommon", "TestLiZConfigCommon\TestLibZConfigCommon.csproj", "{C96F45C7-CAF5-45C0-A5DF-B84999CEE303}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibZConfigClient", "LibZConfigClient\LibZConfigClient.csproj", "{5CC71711-09A2-421C-AE68-5918BAE92EBE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C96F45C7-CAF5-45C0-A5DF-B84999CEE303}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C96F45C7-CAF5-45C0-A5DF-B84999CEE303}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C96F45C7-CAF5-45C0-A5DF-B84999CEE303}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5CC71711-09A2-421C-AE68-5918BAE92EBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CC71711-09A2-421C-AE68-5918BAE92EBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CC71711-09A2-421C-AE68-5918BAE92EBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CC71711-09A2-421C-AE68-5918BAE92EBE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

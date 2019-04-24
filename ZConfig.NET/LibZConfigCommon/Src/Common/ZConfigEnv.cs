@@ -6,6 +6,9 @@ using LibZConfig.Common.Utils;
 
 namespace LibZConfig.Common
 {
+    /// <summary>
+    /// Client/Service instance handle base class.
+    /// </summary>
     public class ZConfigInstance
     {
         /// <summary>
@@ -118,6 +121,26 @@ namespace LibZConfig.Common
 
             ConfigName = name;
             Configuration = new Configuration(settings);
+        }
+
+        /// <summary>
+        /// Create and setup a new node instance handle.
+        /// </summary>
+        /// <typeparam name="T">Instance Type.</typeparam>
+        /// <returns>Node Instance Handle.</returns>
+        protected T SetupInstance<T>() where T: ZConfigInstance
+        {
+            T instance = Activator.CreateInstance<T>();
+            instance.ID = Guid.NewGuid().ToString();
+            instance.StartTime = DateTime.Now;
+
+            ConfigurationAnnotationProcessor.Process<T>(Configuration, instance);
+            instance.IP = NetUtils.GetIpAddress();
+            instance.Hostname = NetUtils.GetHostName();
+            instance.ApplicationGroup = Configuration.Header.ApplicationGroup;
+            instance.ApplicationName = Configuration.Header.Application;
+
+            return instance;
         }
     }
 }

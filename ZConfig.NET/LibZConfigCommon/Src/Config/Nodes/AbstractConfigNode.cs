@@ -138,6 +138,15 @@ namespace LibZConfig.Common.Config.Nodes
         {
             return new ENodeState[] { ENodeState.Error };
         }
+
+        /// <summary>
+        /// Get the default error state for this type.
+        /// </summary>
+        /// <returns>Error State</returns>
+        public override ENodeState GetDefaultErrorState()
+        {
+            return ENodeState.Error;
+        }
     }
 
     /// <summary>

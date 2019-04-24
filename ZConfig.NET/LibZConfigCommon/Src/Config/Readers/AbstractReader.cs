@@ -196,6 +196,15 @@ namespace LibZConfig.Common.Config.Readers
         {
             return new EReaderState[] { EReaderState.Error };
         }
+
+        /// <summary>
+        /// Get the default error state for this type.
+        /// </summary>
+        /// <returns>Error State</returns>
+        public override EReaderState GetDefaultErrorState()
+        {
+            return EReaderState.Error;
+        }
     }
 
     /// <summary>
