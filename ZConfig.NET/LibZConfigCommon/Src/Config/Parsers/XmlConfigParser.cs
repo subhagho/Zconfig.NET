@@ -140,11 +140,13 @@ namespace LibZConfig.Common.Config.Parsers
         /// </summary>
         public const string XML_CONFIG_ATTR_RESOURCE_NAME = "resourceName";
     }
+
     /// <summary>
     /// Configuration Parser implementation for reading XML configurations.
     /// </summary>
     public class XmlConfigParser : AbstractConfigParser
     {
+        public const string XML_VALUE_ENCRYPTED = "encrypted";
 
         /// <summary>
         /// Parse a new configuration instance.
@@ -233,7 +235,19 @@ namespace LibZConfig.Common.Config.Parsers
             AbstractConfigNode parent = nodeStack.Peek();
             if (IsTextNode(elem))
             {
-                AddValueNode(parent, elem.Name, elem.FirstChild.Value);
+                bool encrypted = false;
+                if (elem.HasAttributes)
+                {
+                    string attr = elem.Attributes[XML_VALUE_ENCRYPTED].Value;
+                    if (!String.IsNullOrWhiteSpace(attr))
+                    {
+                        if (attr.CompareTo("true") == 0)
+                        {
+                            encrypted = true;
+                        }
+                    }
+                }
+                AddValueNode(parent, elem.Name, elem.FirstChild.Value, encrypted);
             }
             else
             {
@@ -352,7 +366,8 @@ namespace LibZConfig.Common.Config.Parsers
                             cp.AddChildNode(attrs);
                             foreach (XmlAttribute attr in elem.Attributes)
                             {
-                                attrs.Add(attr.Name, attr.Value);
+                                ConfigValueNode vn = new ConfigValueNode(attrs.Configuration, attrs);
+                                attrs.Add(vn);
                             }
                         }
                     }
@@ -523,32 +538,31 @@ namespace LibZConfig.Common.Config.Parsers
         /// <param name="parent">Parent Configuration node</param>
         /// <param name="name">Value node name</param>
         /// <param name="value">Value</param>
-        private void AddValueNode(AbstractConfigNode parent, string name, string value)
+        private void AddValueNode(AbstractConfigNode parent, string name, string value, bool encrypted)
         {
+            ConfigValueNode vn = new ConfigValueNode(parent.Configuration, parent);
+            vn.Encrypted = encrypted;
+            vn.Name = name;
+            vn.SetValue(value);
+
             if (parent.GetType() == typeof(ConfigParametersNode))
             {
                 ConfigParametersNode node = (ConfigParametersNode)parent;
-                node.Add(name, value);
+                node.Add(vn);
             }
             else if (parent.GetType() == typeof(ConfigPropertiesNode))
             {
                 ConfigPropertiesNode node = (ConfigPropertiesNode)parent;
-                node.Add(name, value);
+                node.Add(vn);
             }
             else if (parent.GetType() == typeof(ConfigListValueNode))
             {
                 ConfigListValueNode node = (ConfigListValueNode)parent;
-                ConfigValueNode vn = new ConfigValueNode(parent.Configuration, parent);
-                vn.Name = name;
-                vn.SetValue(value);
                 node.Add(vn);
             }
             else if (parent.GetType() == typeof(ConfigPathNode))
             {
                 ConfigPathNode node = (ConfigPathNode)parent;
-                ConfigValueNode vn = new ConfigValueNode(parent.Configuration, parent);
-                vn.Name = name;
-                vn.SetValue(value);
                 node.AddChildNode(vn);
             }
             else

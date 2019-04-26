@@ -121,25 +121,14 @@ namespace LibZConfig.Common.Config.Nodes
         }
 
         /// <summary>
-        /// Add a value to this node.
+        /// Add a value node to this map.
         /// </summary>
-        /// <param name="name">Name</param>
-        /// <param name="value">Value</param>
-        public void Add(string name, string value)
+        /// <param name="node">Node to Add</param>
+        public void Add(ConfigValueNode node)
         {
-            Contract.Requires(!String.IsNullOrWhiteSpace(name));
-            ConfigValueNode node = null;
-            if (values.ContainsKey(name))
-            {
-                node = values[name];
-            }
-            else
-            {
-                node = new ConfigValueNode(Configuration, this);
-                node.Name = name;
-                values[name] = node;
-            }
-            node.SetValue(value);
+            Contract.Requires(node != null);
+            Contract.Requires(!String.IsNullOrWhiteSpace(node.Name));
+            values[node.Name] = node;
             Updated();
         }
 
