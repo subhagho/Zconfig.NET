@@ -189,7 +189,7 @@ namespace LibZConfig.Common.Config.Nodes
         /// <param name="parent">Parent node.</param>
         protected AbstractConfigNode(Configuration configuration, AbstractConfigNode parent)
         {
-            Contract.Requires(configuration != null);
+            Preconditions.CheckArgument(configuration);
 
             this.Configuration = configuration;
             this.Parent = parent;
@@ -245,7 +245,7 @@ namespace LibZConfig.Common.Config.Nodes
         /// <returns>Config node instance</returns>
         public virtual AbstractConfigNode Find(string path)
         {
-            Contract.Requires(!string.IsNullOrWhiteSpace(path));
+            Preconditions.CheckArgument(path);
 
             path = ConfigUtils.CheckSearchPath(path, this);
             if (path == ".")
@@ -314,7 +314,8 @@ namespace LibZConfig.Common.Config.Nodes
         /// <param name="configuration">Configuration instance</param>
         public virtual void UpdateConfiguration(Configuration configuration)
         {
-            Contract.Requires(configuration != null);
+            Preconditions.CheckArgument(configuration);
+
             this.Configuration = configuration;
         }
 

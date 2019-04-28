@@ -91,9 +91,9 @@ namespace LibZConfig.Common.Config
         /// <returns>Updated Target Type instance</returns>
         public static T Process<T>(Configuration configuration, T target)
         {
-            Contract.Requires(configuration != null);
-            Contract.Requires(target != null);
-
+            Preconditions.CheckArgument(configuration);
+            Preconditions.CheckArgument(target);
+            
             Type type = target.GetType();
             ConfigPath path = (ConfigPath)Attribute.GetCustomAttribute(type, typeof(ConfigPath));
             if (path != null)
@@ -125,9 +125,9 @@ namespace LibZConfig.Common.Config
         /// <returns>Updated Target Type instance</returns>
         public static T Process<T>(AbstractConfigNode parent, T target)
         {
-            Contract.Requires(parent != null);
-            Contract.Requires(target != null);
-
+            Preconditions.CheckArgument(parent);
+            Preconditions.CheckArgument(target);
+            
             Type type = target.GetType();
             ConfigPath path = (ConfigPath)Attribute.GetCustomAttribute(type, typeof(ConfigPath));
             if (path != null)
@@ -159,7 +159,7 @@ namespace LibZConfig.Common.Config
         /// <returns>Updated Target Type instance</returns>
         public static T Process<T>(Configuration configuration)
         {
-            Contract.Requires(configuration != null);
+            Preconditions.CheckArgument(configuration);
 
             Type type = typeof(T);
             T target = default(T);
@@ -196,7 +196,7 @@ namespace LibZConfig.Common.Config
         /// <returns>Updated Target Type instance</returns>
         public static T Process<T>(AbstractConfigNode parent)
         {
-            Contract.Requires(parent != null);
+            Preconditions.CheckArgument(parent);
 
             Type type = typeof(T);
             T target = default(T);

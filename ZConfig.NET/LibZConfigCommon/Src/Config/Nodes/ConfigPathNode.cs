@@ -79,7 +79,8 @@ namespace LibZConfig.Common.Config.Nodes
         /// <returns>Self</returns>
         public ConfigPathNode AddChildNode(AbstractConfigNode node)
         {
-            Contract.Requires(node != null);
+            Preconditions.CheckArgument(node);
+
             node.Parent = this;
             if (!typeof(ConfigResourceNode).IsAssignableFrom(node.GetType()))
             {

@@ -90,7 +90,8 @@ namespace LibZConfig.Common.Config.Nodes
         /// <param name="value">Configuation node</param>
         public void Add(T value)
         {
-            Contract.Requires(value != null);
+            Preconditions.CheckArgument(value);
+
             values.Add(value);
         }
 
@@ -100,7 +101,7 @@ namespace LibZConfig.Common.Config.Nodes
         /// <param name="values">List of Elements</param>
         public void AddAll(List<T> values)
         {
-            Contract.Requires(values != null && values.Count > 0);
+            Preconditions.CheckArgument(values != null && values.Count > 0);
             foreach (T value in values)
             {
                 this.values.Add(value);

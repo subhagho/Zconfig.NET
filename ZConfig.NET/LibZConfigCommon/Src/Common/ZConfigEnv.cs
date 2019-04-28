@@ -151,7 +151,7 @@ namespace LibZConfig.Common
         /// <param name="name">Configuration Name</param>
         protected ZConfigEnv(string name)
         {
-            Contract.Requires(!String.IsNullOrWhiteSpace(name));
+            Preconditions.CheckArgument(name);
             ConfigName = name;
         }
 
@@ -183,8 +183,8 @@ namespace LibZConfig.Common
         /// <param name="password">Password, if configuration has encrypted nodes.</param>
         protected void Init(string configfile, Version version, string password = null)
         {
-            Contract.Requires(!String.IsNullOrWhiteSpace(configfile));
-            Contract.Requires(version != null);
+            Preconditions.CheckArgument(configfile);
+            Preconditions.CheckArgument(version);
 
             try
             {

@@ -76,9 +76,9 @@ namespace LibZConfig.Common
         /// <param name="error">Exception handle.</param>
         public void SetError(T state, Exception error)
         {
-            Contract.Requires(!state.Equals(default(T)));
-            Contract.Requires(error != null);
-
+            Preconditions.CheckArgument(state);
+            Preconditions.CheckArgument(error);
+            
             State = state;
             this.error = error;
         }
@@ -89,8 +89,8 @@ namespace LibZConfig.Common
         /// <param name="error">Exception handle.</param>
         public void SetError(Exception error)
         {
-            Contract.Requires(error != null);
-
+            Preconditions.CheckArgument(error);
+           
             State = GetDefaultErrorState();
             this.error = error;
         }

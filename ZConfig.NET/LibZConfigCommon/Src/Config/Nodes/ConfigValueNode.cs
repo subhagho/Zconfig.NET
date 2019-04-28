@@ -83,6 +83,24 @@ namespace LibZConfig.Common.Config.Nodes
         }
 
         /// <summary>
+        /// Get the Decrypted value of the string for this node.
+        /// </summary>
+        /// <returns>Decrypted Value</returns>
+        public string GetDecryptedValue()
+        {
+            if (IsEncrypted() && !String.IsNullOrWhiteSpace(value))
+            {
+                string v = ZConfigEnv.Vault.Decrypt(value, Configuration);
+                if (String.IsNullOrWhiteSpace(v))
+                {
+                    throw new ConfigurationException(String.Format("Error Decrypting value. [path={0}]", GetSearchPath()));
+                }
+                return v;
+            }
+            return value;
+        }
+
+        /// <summary>
         /// Execute find on this node, will return self if terminal node in search and name matches.
         /// </summary>
         /// <param name="path">Path list</param>

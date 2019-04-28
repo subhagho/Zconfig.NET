@@ -158,6 +158,10 @@ namespace LibZConfig.Common.Config.Parsers
         /// <param name="password">Decryption Password (if required)</param>
         public override void Parse(string name, AbstractReader reader, Version version, ConfigurationSettings settings, string password = null)
         {
+            Preconditions.CheckArgument(name);
+            Preconditions.CheckArgument(reader);
+            Preconditions.CheckArgument(version);
+
             if (settings == null)
             {
                 settings = new ConfigurationSettings();
@@ -177,7 +181,8 @@ namespace LibZConfig.Common.Config.Parsers
 
                 if (!String.IsNullOrWhiteSpace(password))
                 {
-
+                    ZConfigEnv.Vault.AddPasscode(configuration, password);
+                    LogUtils.Info(String.Format("Added passcode to vault. [configuration={0}]", configuration.Header.Name));
                 }
                 LogUtils.Debug(String.Format("Configuration Loaded: [name={0}]", configuration.Header.Name), configuration);
             }
@@ -367,6 +372,9 @@ namespace LibZConfig.Common.Config.Parsers
                             foreach (XmlAttribute attr in elem.Attributes)
                             {
                                 ConfigValueNode vn = new ConfigValueNode(attrs.Configuration, attrs);
+                                vn.Name = attr.Name;
+                                vn.SetValue(attr.Value);
+
                                 attrs.Add(vn);
                             }
                         }

@@ -253,7 +253,7 @@ namespace LibZConfig.Common.Config.Readers
         /// <param name="filename">File path</param>
         public FileReader(string filename)
         {
-            Contract.Requires(!String.IsNullOrWhiteSpace(filename));
+            Preconditions.CheckArgument(filename);
             this.filename = filename;
         }
 
@@ -263,7 +263,7 @@ namespace LibZConfig.Common.Config.Readers
         /// <param name="location">File URI</param>
         public FileReader(Uri location)
         {
-            Contract.Requires(location != null);
+            Preconditions.CheckArgument(location);
             EUriScheme type = EUriScheme.none.GetUriType(location);
             if (type != EUriScheme.file)
             {
@@ -343,7 +343,7 @@ namespace LibZConfig.Common.Config.Readers
         /// <param name="location">Uri String</param>
         public RemoteReader(string location)
         {
-            Contract.Requires(!String.IsNullOrWhiteSpace(location));
+            Preconditions.CheckArgument(location);
             this.location = new Uri(location);
             if (!this.location.IsWellFormedOriginalString())
             {
@@ -357,7 +357,7 @@ namespace LibZConfig.Common.Config.Readers
         /// <param name="location">Uri location</param>
         public RemoteReader(Uri location)
         {
-            Contract.Requires(location != null);
+            Preconditions.CheckArgument(location);
             this.location = location;
             if (!this.location.IsWellFormedOriginalString())
             {
@@ -430,7 +430,7 @@ namespace LibZConfig.Common.Config.Readers
         /// <returns>Self</returns>
         public RemoteReader WithUser(string username)
         {
-            Contract.Requires(!String.IsNullOrWhiteSpace(username));
+            Preconditions.CheckArgument(username);
             this.username = username;
             return this;
         }
@@ -442,7 +442,7 @@ namespace LibZConfig.Common.Config.Readers
         /// <returns>Self</returns>
         public RemoteReader WithPassword(string password)
         {
-            Contract.Requires(!String.IsNullOrWhiteSpace(username));
+            Preconditions.CheckArgument(password);
             this.password = password;
             return this;
         }
@@ -467,7 +467,8 @@ namespace LibZConfig.Common.Config.Readers
         /// <param name="location">Uri String</param>
         public FtpRemoteReader(string location)
         {
-            Contract.Requires(!String.IsNullOrWhiteSpace(location));
+            Preconditions.CheckArgument(location);
+
             this.location = new Uri(location);
             if (!this.location.IsWellFormedOriginalString())
             {
@@ -481,7 +482,8 @@ namespace LibZConfig.Common.Config.Readers
         /// <param name="location">Uri location</param>
         public FtpRemoteReader(Uri location)
         {
-            Contract.Requires(location != null);
+            Preconditions.CheckArgument(location);
+
             this.location = location;
             if (!this.location.IsWellFormedOriginalString())
             {
@@ -547,7 +549,7 @@ namespace LibZConfig.Common.Config.Readers
         /// <returns>Self</returns>
         public FtpRemoteReader WithUser(string username)
         {
-            Contract.Requires(!String.IsNullOrWhiteSpace(username));
+            Preconditions.CheckArgument(username);
             this.username = username;
             return this;
         }
@@ -559,7 +561,7 @@ namespace LibZConfig.Common.Config.Readers
         /// <returns>Self</returns>
         public FtpRemoteReader WithPassword(string password)
         {
-            Contract.Requires(!String.IsNullOrWhiteSpace(username));
+            Preconditions.CheckArgument(password);
             this.password = password;
             return this;
         }

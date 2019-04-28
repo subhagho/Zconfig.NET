@@ -3,7 +3,6 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using System.Diagnostics.Contracts;
 using LibZConfig.Common.Config;
 
 namespace LibZConfig.Common.Utils
@@ -22,7 +21,7 @@ namespace LibZConfig.Common.Utils
         /// <returns>Hash String (Base64 encoded)</returns>
         public static string GetKeyHash(string key)
         {
-            Contract.Requires(!String.IsNullOrWhiteSpace(key));
+            Preconditions.CheckArgument(key);
 
             using (MD5 md5 = MD5.Create())
             {
@@ -41,8 +40,8 @@ namespace LibZConfig.Common.Utils
         /// <returns>Matches?</returns>
         public static bool CompareHash(string hash, string key)
         {
-            Contract.Requires(!String.IsNullOrWhiteSpace(key));
-            Contract.Requires(!String.IsNullOrWhiteSpace(hash));
+            Preconditions.CheckArgument(hash);
+            Preconditions.CheckArgument(key);
 
             string khash = GetKeyHash(key);
             return (hash == khash);
@@ -56,8 +55,9 @@ namespace LibZConfig.Common.Utils
         /// <returns>Encrypted Byte Array</returns>
         public static byte[] Encrypt(string text, string password)
         {
-            Contract.Requires(!String.IsNullOrWhiteSpace(text));
-            Contract.Requires(!String.IsNullOrWhiteSpace(password));
+            Preconditions.CheckArgument(text);
+            Preconditions.CheckArgument(password);
+            Preconditions.CheckArgument(password.Length == 16);
 
             byte[] pbytes = Encoding.UTF8.GetBytes(password);
             using (Aes algo = Aes.Create())
@@ -109,8 +109,8 @@ namespace LibZConfig.Common.Utils
         /// <returns>Decrypted String</returns>
         public static string Decrypt(byte[] data, string password)
         {
-            Contract.Requires(data != null && data.Length > 0);
-            Contract.Requires(!String.IsNullOrWhiteSpace(password));
+            Preconditions.CheckArgument(data != null && data.Length > 0);
+            Preconditions.CheckArgument(password);
 
             byte[] pbytes = Encoding.UTF8.GetBytes(password);
             // Create an Aes object
@@ -210,8 +210,8 @@ namespace LibZConfig.Common.Utils
         /// <returns>Self</returns>
         public ConfigVault AddPasscode(Configuration config, string passcode)
         {
-            Contract.Requires(!String.IsNullOrWhiteSpace(passcode));
-            Contract.Requires(config != null);
+            Preconditions.CheckArgument(passcode);
+            Preconditions.CheckArgument(config);
 
             string key = GetEncodingKey(config);
             string encrypted = CryptoUtils.EncryptToString(passcode, key);
@@ -227,7 +227,7 @@ namespace LibZConfig.Common.Utils
         /// <returns>Password</returns>
         public string GetPasscode(Configuration config)
         {
-            Contract.Requires(config != null);
+            Preconditions.CheckArgument(config);
             if (vault.ContainsKey(config.Header.Id))
             {
                 string value = vault[config.Header.Id];
@@ -246,8 +246,8 @@ namespace LibZConfig.Common.Utils
         /// <returns>Decrypted data</returns>
         public string Decrypt(string data, Configuration config)
         {
-            Contract.Requires(config != null);
-            Contract.Requires(!String.IsNullOrWhiteSpace(data));
+            Preconditions.CheckArgument(config);
+            Preconditions.CheckArgument(data);
 
             string passcode = GetPasscode(config);
             if (String.IsNullOrWhiteSpace(passcode))
@@ -274,7 +274,7 @@ namespace LibZConfig.Common.Utils
             {
                 index = key.Length - 17;
             }
-            return key.Substring(index, index + 16);
+            return key.Substring(index, 16);
         }
     }
 }

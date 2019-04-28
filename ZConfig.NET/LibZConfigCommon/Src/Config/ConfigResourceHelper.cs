@@ -46,9 +46,9 @@ namespace LibZConfig.Common.Config
         /// <returns>Stream Reader</returns>
         public static StreamReader GetResourceStream(this Configuration configuration, string path)
         {
-            Contract.Requires(configuration != null);
-            Contract.Requires(!String.IsNullOrWhiteSpace(path));
-
+            Preconditions.CheckArgument(configuration);
+            Preconditions.CheckArgument(path);
+            
             AbstractConfigNode node = configuration.Find(path);
             if (node != null && typeof(ConfigResourceNode).IsAssignableFrom(node.GetType()))
             {
@@ -101,10 +101,10 @@ namespace LibZConfig.Common.Config
         /// <returns>Stream Reader</returns>
         public static StreamReader GetResourceStream(this Configuration configuration, string path, string file)
         {
-            Contract.Requires(configuration != null);
-            Contract.Requires(!String.IsNullOrWhiteSpace(path));
-            Contract.Requires(!String.IsNullOrWhiteSpace(file));
-
+            Preconditions.CheckArgument(configuration);
+            Preconditions.CheckArgument(path);
+            Preconditions.CheckArgument(file);
+            
             AbstractConfigNode node = configuration.Find(path);
             if (node != null && typeof(ConfigResourceNode).IsAssignableFrom(node.GetType()))
             {

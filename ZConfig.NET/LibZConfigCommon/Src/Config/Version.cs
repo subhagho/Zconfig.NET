@@ -96,7 +96,7 @@ namespace LibZConfig.Common.Config
         /// <returns>Is Equal?</returns>
         public override bool Equals(object obj)
         {
-            if (typeof(Version).IsAssignableFrom(obj.GetType()))
+            if (obj != null && typeof(Version).IsAssignableFrom(obj.GetType()))
             {
                 Version version = (Version)obj;
                 if (IsCompatible(version))

@@ -90,7 +90,8 @@ namespace LibZConfig.Common.Config.Factories
         /// <returns>Parsed Enum value</returns>
         public static EReaderType Parse(this EReaderType type, string value)
         {
-            Contract.Requires(!String.IsNullOrWhiteSpace(value));
+            Preconditions.CheckArgument(value);
+
             value = value.Trim().ToUpper();
             return (EReaderType)Enum.Parse(typeof(EReaderType), value);
         }
@@ -102,7 +103,7 @@ namespace LibZConfig.Common.Config.Factories
         /// <returns>Extracted Reader type</returns>
         public static EReaderType ParseFromUri(Uri uri)
         {
-            Contract.Requires(uri != null);
+            Preconditions.CheckArgument(uri);
             return EReaderType.Unknown.Parse(uri.Scheme);
         }
 
@@ -113,7 +114,7 @@ namespace LibZConfig.Common.Config.Factories
         /// <returns>URI Scheme</returns>
         public static string GetURIScheme(EReaderType type)
         {
-            switch(type)
+            switch (type)
             {
                 case EReaderType.FILE:
                     return Uri.UriSchemeFile;
@@ -143,7 +144,7 @@ namespace LibZConfig.Common.Config.Factories
         /// <returns>Configuration Parser instance</returns>
         public static AbstractConfigParser GetParser(string filename)
         {
-            Contract.Requires(!String.IsNullOrWhiteSpace(filename));
+            Preconditions.CheckArgument(filename);
 
             string ext = Path.GetExtension(filename);
             if (!String.IsNullOrWhiteSpace(ext))
@@ -199,7 +200,8 @@ namespace LibZConfig.Common.Config.Factories
         /// <returns>Configuration Reader instance</returns>
         public static AbstractReader GetReader(Uri source)
         {
-            Contract.Requires(source != null);
+            Preconditions.CheckArgument(source);
+
             EReaderType type = ReaderTypeHelper.ParseFromUri(source);
             if (type != EReaderType.Unknown)
             {

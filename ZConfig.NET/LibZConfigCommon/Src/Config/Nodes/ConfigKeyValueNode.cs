@@ -113,7 +113,7 @@ namespace LibZConfig.Common.Config.Nodes
         /// <param name="values">Dictionary of Values.</param>
         public void AddAll(Dictionary<string, ConfigValueNode> values)
         {
-            Contract.Requires(values != null && values.Count > 0);
+            Preconditions.CheckArgument(values != null && values.Count > 0);
             foreach (string key in values.Keys)
             {
                 this.values[key] = values[key];
@@ -126,8 +126,9 @@ namespace LibZConfig.Common.Config.Nodes
         /// <param name="node">Node to Add</param>
         public void Add(ConfigValueNode node)
         {
-            Contract.Requires(node != null);
-            Contract.Requires(!String.IsNullOrWhiteSpace(node.Name));
+            Preconditions.CheckArgument(node);
+            Preconditions.CheckArgument(node.Name);
+
             values[node.Name] = node;
             Updated();
         }
@@ -279,13 +280,13 @@ namespace LibZConfig.Common.Config.Nodes
     public class ConfigPropertiesNode : ConfigKeyValueNode
     {
         public const char NODE_ABBREVIATION = '$';
-        
+
         /// <summary>
         /// Default Empty constructor
         /// </summary>
         public ConfigPropertiesNode() : base()
         {
-           
+
         }
 
         /// <summary>

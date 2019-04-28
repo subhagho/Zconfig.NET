@@ -47,7 +47,7 @@ namespace LibZConfig.Common.Utils
         /// <returns>Assembly instance</returns>
         public static Assembly GetOrLoadAssembly(string name, string assemblyFile)
         {
-            Contract.Requires(!String.IsNullOrWhiteSpace(name));
+            Preconditions.CheckArgument(name);
 
             if (__assemblies.ContainsKey(name))
             {
@@ -98,8 +98,8 @@ namespace LibZConfig.Common.Utils
         /// <returns>Property Info</returns>
         public static PropertyInfo FindProperty(Type type, string name)
         {
-            Contract.Requires(type != null);
-            Contract.Requires(!String.IsNullOrWhiteSpace(name));
+            Preconditions.CheckArgument(type);
+            Preconditions.CheckArgument(name);
 
             string[] parts = name.Split('.');
             if (parts != null && parts.Length > 0)
@@ -140,8 +140,8 @@ namespace LibZConfig.Common.Utils
         /// <returns>Field Info</returns>
         public static FieldInfo FindField(Type type, string name)
         {
-            Contract.Requires(type != null);
-            Contract.Requires(!String.IsNullOrWhiteSpace(name));
+            Preconditions.CheckArgument(type);
+            Preconditions.CheckArgument(name);
 
             string[] parts = name.Split('.');
             if (parts != null && parts.Length > 0)
@@ -181,8 +181,8 @@ namespace LibZConfig.Common.Utils
         /// <returns>Method Info</returns>
         public static MethodInfo GetSetter(Type type, FieldInfo field)
         {
-            Contract.Requires(type != null);
-            Contract.Requires(field != null);
+            Preconditions.CheckArgument(type);
+            Preconditions.CheckArgument(field);
 
             string name = String.Format("Set{0}", field.Name.Capitalize());
             return type.GetMethod(name);
@@ -198,8 +198,8 @@ namespace LibZConfig.Common.Utils
         /// <returns>Method Info</returns>
         public static MethodInfo GetGetter(Type type, FieldInfo field)
         {
-            Contract.Requires(type != null);
-            Contract.Requires(field != null);
+            Preconditions.CheckArgument(type);
+            Preconditions.CheckArgument(field);
 
             string name = String.Format("Get{0}", field.Name.Capitalize());
             return type.GetMethod(name);

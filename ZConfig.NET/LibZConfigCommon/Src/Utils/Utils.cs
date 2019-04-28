@@ -47,7 +47,7 @@ namespace LibZConfig.Common.Utils
 
         public static string Capitalize(this string value)
         {
-            Contract.Requires(!String.IsNullOrWhiteSpace(value));
+            Preconditions.CheckArgument(value);
             return String.Format("{0}{1}", Char.ToUpper(value[0]), value.Substring(1));
         }
     }

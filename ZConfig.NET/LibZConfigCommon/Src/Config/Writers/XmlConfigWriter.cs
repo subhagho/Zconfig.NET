@@ -46,7 +46,7 @@ namespace LibZConfig.Common.Config.Writers
         /// <returns>Return the string buffer</returns>
         public override string Write(Configuration configuration)
         {
-            Contract.Requires(configuration != null);
+            Preconditions.CheckArgument(configuration);
             StringWriter sw = new StringWriter();
 
             var settings = new XmlWriterSettings();
@@ -87,7 +87,9 @@ namespace LibZConfig.Common.Config.Writers
         /// <returns>Return the path of the output file created.</returns>
         public override string Write(Configuration configuration, string path)
         {
-            Contract.Requires(configuration != null);
+            Preconditions.CheckArgument(configuration);
+            Preconditions.CheckArgument(path);
+
             Contract.Requires(!String.IsNullOrWhiteSpace(path));
             string filename = String.Format("{0}/{1}.xml", path, configuration.Header.Name);
 

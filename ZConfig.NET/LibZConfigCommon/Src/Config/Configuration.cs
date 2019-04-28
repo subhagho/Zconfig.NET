@@ -295,7 +295,8 @@ namespace LibZConfig.Common.Config
         /// <returns>Configuration Node</returns>
         public AbstractConfigNode Find(string path)
         {
-            Contract.Requires(!String.IsNullOrWhiteSpace(path));
+            Preconditions.CheckArgument(path);
+
             if (path.StartsWith(ConfigurationSettings.NODE_SEARCH_SEPERATOR))
             {
                 path = path.Substring(1);
@@ -311,8 +312,9 @@ namespace LibZConfig.Common.Config
         /// <returns>Configuratio Node</returns>
         public AbstractConfigNode Find(AbstractConfigNode node, string path)
         {
-            Contract.Requires(node != null);
-            Contract.Requires(!String.IsNullOrWhiteSpace(path));
+            Preconditions.CheckArgument(node);
+            Preconditions.CheckArgument(path);
+            
             return node.Find(path);
         }
 
@@ -324,8 +326,9 @@ namespace LibZConfig.Common.Config
         /// <returns>Temporary Folder path</returns>
         public string GetInstancePath(string subdir)
         {
-            Contract.Requires(Settings != null);
-            Contract.Requires(Header != null);
+            Postconditions.CheckCondition(Settings);
+            Postconditions.CheckCondition(Header);
+            
             lock(this)
             {
                 string dir = String.Format("{0}{1}{2}{1}{3}{1}{4}", Header.ApplicationGroup, Path.PathSeparator, Header.Application, Header.Name, Header.Version.ToString());
