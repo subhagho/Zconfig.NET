@@ -1,7 +1,8 @@
 language: csharp
 solution: ZConfig.NET.sln
 mono: none
-dotnet: 2.1
+dist: xenial
+dotnet: 2.2
 before_install:
         - cd ZConfig.NET
 install:
@@ -9,3 +10,7 @@ install:
 script:
         - dotnet build 
         - dotnet test TestLiZConfigCommon/TestLibZConfigCommon.csproj
+global:
+        - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true
+          DOTNET_CLI_TELEMTERY_OUTPUT=1
+
