@@ -5,7 +5,6 @@ namespace LibZConfig.Common.Utils
 {
     public class Test_NetUtils
     {
-        [Fact]
         public void GetIpAddress()
         {
             try
@@ -21,7 +20,6 @@ namespace LibZConfig.Common.Utils
             }
         }
 
-        [Fact]
         public void GetIpV6Address()
         {
             try
@@ -37,7 +35,6 @@ namespace LibZConfig.Common.Utils
             }
         }
 
-        [Fact]
         public void GetHostName()
         {
             try
