@@ -72,7 +72,7 @@ namespace LibZConfig.Common.Config
         /// <returns>Is Compatible?</returns>
         public bool IsCompatible(Version target)
         {
-            if (MajorVersion == target.MajorVersion)
+            if (target != null && MajorVersion == target.MajorVersion)
             {
                 return true;
             }

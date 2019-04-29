@@ -93,7 +93,7 @@ namespace LibZConfig.Common.Config
         {
             Preconditions.CheckArgument(configuration);
             Preconditions.CheckArgument(target);
-            
+
             Type type = target.GetType();
             ConfigPath path = (ConfigPath)Attribute.GetCustomAttribute(type, typeof(ConfigPath));
             if (path != null)
@@ -127,7 +127,7 @@ namespace LibZConfig.Common.Config
         {
             Preconditions.CheckArgument(parent);
             Preconditions.CheckArgument(target);
-            
+
             Type type = target.GetType();
             ConfigPath path = (ConfigPath)Attribute.GetCustomAttribute(type, typeof(ConfigPath));
             if (path != null)
@@ -954,6 +954,21 @@ namespace LibZConfig.Common.Config
             }
 
             return target;
+        }
+
+        /// <summary>
+        /// Get the Path attribute for this type.
+        /// </summary>
+        /// <param name="type">Type to get path for</param>
+        /// <returns>Path attribute value</returns>
+        public static string GetAnnotationPath(Type type)
+        {
+            ConfigPath path = (ConfigPath)Attribute.GetCustomAttribute(type, typeof(ConfigPath));
+            if (path != null)
+            {
+                return path.Path;
+            }
+            return null;
         }
     }
 }
