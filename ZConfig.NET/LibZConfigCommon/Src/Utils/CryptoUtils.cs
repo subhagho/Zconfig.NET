@@ -12,7 +12,6 @@ namespace LibZConfig.Common.Utils
     /// </summary>
     public static class CryptoUtils
     {
-        private static string IV = Guid.NewGuid().ToString().Substring(0, 16);
 
         /// <summary>
         /// Get the hash (MD5) for the passed input string.
@@ -53,7 +52,7 @@ namespace LibZConfig.Common.Utils
         /// <param name="text">Input Text</param>
         /// <param name="password">Secret Key</param>
         /// <returns>Encrypted Byte Array</returns>
-        public static byte[] Encrypt(string text, string password)
+        public static byte[] Encrypt(string text, string password, string iv)
         {
             Preconditions.CheckArgument(text);
             Preconditions.CheckArgument(password);
@@ -62,13 +61,14 @@ namespace LibZConfig.Common.Utils
             byte[] pbytes = Encoding.UTF8.GetBytes(password);
             using (Aes algo = Aes.Create())
             {
+                algo.Mode = CipherMode.CBC;
                 algo.KeySize = 128;
                 algo.BlockSize = 128;
                 algo.FeedbackSize = 128;
-                algo.Padding = PaddingMode.Zeros;
+                algo.Padding = PaddingMode.PKCS7;
 
                 algo.Key = pbytes;
-                algo.IV = Encoding.UTF8.GetBytes(IV);
+                algo.IV = Encoding.UTF8.GetBytes(iv);
 
                 // Create an encryptor to perform the stream transform.
                 ICryptoTransform encryptor = algo.CreateEncryptor(algo.Key, algo.IV);
@@ -95,9 +95,9 @@ namespace LibZConfig.Common.Utils
         /// <param name="text">Input Text</param>
         /// <param name="password">Secret Key</param>
         /// <returns>Encrypted Base64 String</returns>
-        public static string EncryptToString(string text, string password)
+        public static string EncryptToString(string text, string password, string iv)
         {
-            byte[] encrypted = Encrypt(text, password);
+            byte[] encrypted = Encrypt(text, password, iv);
             return Convert.ToBase64String(encrypted);
         }
 
@@ -107,7 +107,7 @@ namespace LibZConfig.Common.Utils
         /// <param name="data">Input array</param>
         /// <param name="password">Secret Key</param>
         /// <returns>Decrypted String</returns>
-        public static string Decrypt(byte[] data, string password)
+        public static string Decrypt(byte[] data, string password, string iv)
         {
             Preconditions.CheckArgument(data != null && data.Length > 0);
             Preconditions.CheckArgument(password);
@@ -117,13 +117,14 @@ namespace LibZConfig.Common.Utils
             // with the specified key and IV.
             using (Aes algo = Aes.Create())
             {
+                algo.Mode = CipherMode.CBC;
                 algo.KeySize = 128;
                 algo.BlockSize = 128;
                 algo.FeedbackSize = 128;
-                algo.Padding = PaddingMode.Zeros;
+                algo.Padding = PaddingMode.PKCS7;
 
                 algo.Key = pbytes;
-                algo.IV = Encoding.UTF8.GetBytes(IV);
+                algo.IV = Encoding.UTF8.GetBytes(iv); ;
 
                 // Create a decryptor to perform the stream transform.
                 ICryptoTransform decryptor = algo.CreateDecryptor(algo.Key, algo.IV);
@@ -155,10 +156,10 @@ namespace LibZConfig.Common.Utils
         /// <param name="data">Input array</param>
         /// <param name="password">Secret Key</param>
         /// <returns>Decrypted String</returns>
-        public static string Decrypt(string buffer, string password)
+        public static string Decrypt(string buffer, string password, string iv)
         {
             byte[] bytes = Convert.FromBase64String(buffer);
-            return Decrypt(bytes, password);
+            return Decrypt(bytes, password, iv);
         }
 
         /// <summary>
@@ -190,6 +191,17 @@ namespace LibZConfig.Common.Utils
             }
             return buffer;
         }
+
+        private static RijndaelManaged GetCryptoAlgorithm()
+        {
+            RijndaelManaged algorithm = new RijndaelManaged();
+            //set the mode, padding and block size
+            algorithm.Padding = PaddingMode.PKCS7;
+            algorithm.Mode = CipherMode.CBC;
+            algorithm.KeySize = 128;
+            algorithm.BlockSize = 128;
+            return algorithm;
+        }
     }
 
     /// <summary>
@@ -214,7 +226,9 @@ namespace LibZConfig.Common.Utils
             Preconditions.CheckArgument(config);
 
             string key = GetEncodingKey(config);
-            string encrypted = CryptoUtils.EncryptToString(passcode, key);
+            string iv = GetIvSpec(config);
+
+            string encrypted = CryptoUtils.EncryptToString(passcode, key, iv);
             vault[config.Header.Id] = encrypted;
 
             return this;
@@ -232,8 +246,9 @@ namespace LibZConfig.Common.Utils
             {
                 string value = vault[config.Header.Id];
                 string key = GetEncodingKey(config);
+                string iv = GetIvSpec(config);
 
-                return CryptoUtils.Decrypt(value, key);
+                return CryptoUtils.Decrypt(value, key, iv);
             }
             return null;
         }
@@ -255,7 +270,9 @@ namespace LibZConfig.Common.Utils
                 throw new Exception(
                         "Invalid Passcode: NULL/Empty passcode returned.");
             }
-            return CryptoUtils.Decrypt(data, passcode);
+            string iv = GetIvSpec(config);
+
+            return CryptoUtils.Decrypt(data, passcode, iv);
         }
 
         /// <summary>
@@ -275,6 +292,15 @@ namespace LibZConfig.Common.Utils
                 index = key.Length - 17;
             }
             return key.Substring(index, 16);
+        }
+
+        private string GetIvSpec(Configuration config)
+        {
+            string key = String.Format("{0}{1}{2}", config.Header.Name,
+                                       config.Header.Application,
+                                       config.Header.ApplicationGroup);
+            
+            return key.Substring(0, 16);
         }
     }
 }

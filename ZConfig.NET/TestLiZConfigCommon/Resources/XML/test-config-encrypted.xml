@@ -23,7 +23,7 @@
   ~
   -->
 <root>
-  <header ID="UNIQUE-99918239017" group="TEST-APP-GROUP" application="TEST-APPLICATION" name="test-config-encrypted" version="0.2" passwordHash="2ff9irI7zQgaWmitmRK1Yg==">
+  <header ID="UNIQUE-99918239017" group="TEST-APP-GROUP" application="TEST-APPLICATION" name="test-config" version="0.2" passwordHash="2ff9irI7zQgaWmitmRK1Yg==">
     <description>This is a test encrypted XML configuration file.</description>
     <createdBy user="subho" timestamp="1552835141000" />
     <updatedBy user="subho" timestamp="1552835151000" />
@@ -142,7 +142,7 @@
         <parameters>
           <PARAM_1>This is a replacement test. ${PROP_1}${PROP_2}</PARAM_1>
           <PARAM_2>TEST_PARAM_2</PARAM_2>
-          <PARAM_3 encrypted="true">1xcNlCgLn9GQ8x+tyvsMEg==</PARAM_3>
+          <PARAM_3 encrypted="true">pBfPwW18CPEJUmFDdOURqA==</PARAM_3>
           <PARAM_4>TEST_PARAM_4</PARAM_4>
         </parameters>
         <remoteResource type="FILE" resourceName="common-1.0-20171127.050926-1-javadoc.jar">
@@ -160,7 +160,7 @@
             <user>subho</user>
             <timestamp>01.02.2019 12:32:19</timestamp>
           </updatedBy>
-          <password encrypted="true">XCbz7bpbJxF96ffQAFCDHw==</password>
+          <password encrypted="true">ctoFqnpM1v/TMGkStupP2w==</password>
           <node_4>
             <nodeVersion>1</nodeVersion>
             <parameters>
