@@ -91,9 +91,23 @@ namespace LibZConfig.Common.Config
         /// <returns>Updated Target Type instance</returns>
         public static T Process<T>(Configuration configuration, T target)
         {
+            List<string> valuePaths = null;
+            return Process<T>(configuration, target, out valuePaths);
+        }
+
+        /// <summary>
+        /// Set the target instance values reading from the passed configuration.
+        /// </summary>
+        /// <typeparam name="T">Target Instance type</typeparam>
+        /// <param name="configuration">Configuration instance</param>
+        /// <param name="target">Target Type instance</param>
+        /// <returns>Updated Target Type instance</returns>
+        public static T Process<T>(Configuration configuration, T target, out List<string> valuePaths)
+        {
             Preconditions.CheckArgument(configuration);
             Preconditions.CheckArgument(target);
 
+            valuePaths = null;
             Type type = target.GetType();
             ConfigPath path = (ConfigPath)Attribute.GetCustomAttribute(type, typeof(ConfigPath));
             if (path != null)
@@ -109,7 +123,8 @@ namespace LibZConfig.Common.Config
                 }
                 if (node != null && node.GetType() == typeof(ConfigPathNode))
                 {
-                    target = ReadValues((ConfigPathNode)node, target);
+                    valuePaths = new List<string>();
+                    target = ReadValues((ConfigPathNode)node, target, valuePaths);
                     CallMethodInvokes((ConfigPathNode)node, target);
                 }
             }
@@ -125,9 +140,24 @@ namespace LibZConfig.Common.Config
         /// <returns>Updated Target Type instance</returns>
         public static T Process<T>(AbstractConfigNode parent, T target)
         {
+            List<string> valuePaths = null;
+            return Process<T>(parent, target, out valuePaths);
+        }
+
+        /// <summary>
+        /// Set the target instance values reading from the passed configuration node.
+        /// </summary>
+        /// <typeparam name="T">Target Instance type</typeparam>
+        /// <param name="parent">Configuration node instance</param>
+        /// <param name="target">Target Type instance</param>
+        /// <param name="valuePaths">List of Value paths used</param>
+        /// <returns>Updated Target Type instance</returns>
+        public static T Process<T>(AbstractConfigNode parent, T target, out List<string> valuePaths)
+        {
             Preconditions.CheckArgument(parent);
             Preconditions.CheckArgument(target);
 
+            valuePaths = null;
             Type type = target.GetType();
             ConfigPath path = (ConfigPath)Attribute.GetCustomAttribute(type, typeof(ConfigPath));
             if (path != null)
@@ -143,7 +173,8 @@ namespace LibZConfig.Common.Config
                 }
                 if (node != null && node.GetType() == typeof(ConfigPathNode))
                 {
-                    target = ReadValues((ConfigPathNode)node, target);
+                    valuePaths = new List<string>();
+                    target = ReadValues((ConfigPathNode)node, target, valuePaths);
                     CallMethodInvokes((ConfigPathNode)node, target);
                 }
             }
@@ -180,7 +211,7 @@ namespace LibZConfig.Common.Config
                 {
                     target = CreateInstance<T>(type, (ConfigPathNode)node);
                     Conditions.NotNull(target);
-                    target = ReadValues((ConfigPathNode)node, target);
+                    target = ReadValues((ConfigPathNode)node, target, null);
                     CallMethodInvokes((ConfigPathNode)node, target);
                 }
             }
@@ -279,7 +310,7 @@ namespace LibZConfig.Common.Config
             }
             if (target != null)
             {
-                target = ReadValues((ConfigPathNode)node, target);
+                target = ReadValues((ConfigPathNode)node, target, null);
                 CallMethodInvokes((ConfigPathNode)node, target);
             }
             return target;
@@ -346,7 +377,7 @@ namespace LibZConfig.Common.Config
             }
             if (!ReflectionUtils.IsNull(target))
             {
-                target = ReadValues((ConfigPathNode)node, target);
+                target = ReadValues((ConfigPathNode)node, target, null);
                 CallMethodInvokes((ConfigPathNode)node, target);
             }
             else
@@ -472,7 +503,7 @@ namespace LibZConfig.Common.Config
         /// <param name="node">Configuration Node to read values from</param>
         /// <param name="target">Target Type instance</param>
         /// <returns>Updated Target Type instance</returns>
-        private static T ReadValues<T>(ConfigPathNode node, T target)
+        private static T ReadValues<T>(ConfigPathNode node, T target, List<string> valuePaths)
         {
             Type type = target.GetType();
             PropertyInfo[] properties = type.GetProperties(BindingFlags.Public |
@@ -484,17 +515,17 @@ namespace LibZConfig.Common.Config
                     ConfigParam param = (ConfigParam)Attribute.GetCustomAttribute(property, typeof(ConfigParam));
                     if (param != null)
                     {
-                        target = ProcessProperty(node, target, property, param);
+                        target = ProcessProperty(node, target, property, param, valuePaths);
                     }
                     ConfigAttribute attr = (ConfigAttribute)Attribute.GetCustomAttribute(property, typeof(ConfigAttribute));
                     if (attr != null)
                     {
-                        target = ProcessProperty(node, target, property, attr);
+                        target = ProcessProperty(node, target, property, attr, valuePaths);
                     }
                     ConfigValue value = (ConfigValue)Attribute.GetCustomAttribute(property, typeof(ConfigValue));
                     if (value != null)
                     {
-                        target = ProcessProperty(node, target, property, value);
+                        target = ProcessProperty(node, target, property, value, valuePaths);
                     }
                 }
             }
@@ -507,17 +538,17 @@ namespace LibZConfig.Common.Config
                     ConfigParam param = (ConfigParam)Attribute.GetCustomAttribute(field, typeof(ConfigParam));
                     if (param != null)
                     {
-                        target = ProcessField(node, target, field, param);
+                        target = ProcessField(node, target, field, param, valuePaths);
                     }
                     ConfigAttribute attr = (ConfigAttribute)Attribute.GetCustomAttribute(field, typeof(ConfigAttribute));
                     if (attr != null)
                     {
-                        target = ProcessField(node, target, field, attr);
+                        target = ProcessField(node, target, field, attr, valuePaths);
                     }
                     ConfigValue value = (ConfigValue)Attribute.GetCustomAttribute(field, typeof(ConfigValue));
                     if (value != null)
                     {
-                        target = ProcessField(node, target, field, value);
+                        target = ProcessField(node, target, field, value, valuePaths);
                     }
                 }
             }
@@ -551,7 +582,7 @@ namespace LibZConfig.Common.Config
         /// <param name="property">Property to update</param>
         /// <param name="param">Config param annotation</param>
         /// <returns>Updated Target Type instance.</returns>
-        private static T ProcessProperty<T>(ConfigPathNode node, T target, PropertyInfo property, ConfigParam param)
+        private static T ProcessProperty<T>(ConfigPathNode node, T target, PropertyInfo property, ConfigParam param, List<string> valuePath)
         {
             string pname = param.Name;
             if (String.IsNullOrWhiteSpace(pname))
@@ -582,6 +613,10 @@ namespace LibZConfig.Common.Config
                     {
                         value = vn.GetValue();
                     }
+                    if (valuePath != null)
+                    {
+                        valuePath.Add(pnode.GetSearchPath());
+                    }
                 }
             }
             if (!String.IsNullOrWhiteSpace(value))
@@ -607,7 +642,7 @@ namespace LibZConfig.Common.Config
         /// <param name="attr">Config attribute annotation</param>
         /// <returns>Updated Target Type instance.</returns>
 
-        private static T ProcessProperty<T>(ConfigPathNode node, T target, PropertyInfo property, ConfigAttribute attr)
+        private static T ProcessProperty<T>(ConfigPathNode node, T target, PropertyInfo property, ConfigAttribute attr, List<string> valuePaths)
         {
             string pname = attr.Name;
             if (String.IsNullOrWhiteSpace(pname))
@@ -638,6 +673,10 @@ namespace LibZConfig.Common.Config
                     {
                         value = vn.GetValue();
                     }
+                    if (valuePaths != null)
+                    {
+                        valuePaths.Add(pnode.GetSearchPath());
+                    }
                 }
             }
             if (!String.IsNullOrWhiteSpace(value))
@@ -663,7 +702,7 @@ namespace LibZConfig.Common.Config
         /// <param name="property">Property to update</param>
         /// <param name="configValue">Config value annotation</param>
         /// <returns>Updated Target Type instance.</returns>
-        private static T ProcessProperty<T>(ConfigPathNode node, T target, PropertyInfo property, ConfigValue configValue)
+        private static T ProcessProperty<T>(ConfigPathNode node, T target, PropertyInfo property, ConfigValue configValue, List<string> valuePaths)
         {
             string pname = configValue.Name;
             if (String.IsNullOrWhiteSpace(pname))
@@ -690,6 +729,10 @@ namespace LibZConfig.Common.Config
                 AbstractConfigNode cnode = node.GetChildNode(pname);
                 if (cnode != null)
                 {
+                    if (valuePaths != null)
+                    {
+                        valuePaths.Add(cnode.GetSearchPath());
+                    }
                     if (cnode.GetType() == typeof(ConfigValueNode))
                     {
                         ConfigValueNode vn = (ConfigValueNode)cnode;
@@ -761,7 +804,7 @@ namespace LibZConfig.Common.Config
         /// <param name="field">Property to update</param>
         /// <param name="param">Config param annotation</param>
         /// <returns>Updated Target Type instance.</returns>
-        private static T ProcessField<T>(ConfigPathNode node, T target, FieldInfo field, ConfigParam param)
+        private static T ProcessField<T>(ConfigPathNode node, T target, FieldInfo field, ConfigParam param, List<string> valuePaths)
         {
             string pname = param.Name;
             if (String.IsNullOrWhiteSpace(pname))
@@ -792,6 +835,10 @@ namespace LibZConfig.Common.Config
                     {
                         value = vn.GetValue();
                     }
+                    if (valuePaths != null)
+                    {
+                        valuePaths.Add(pnode.GetSearchPath());
+                    }
                 }
             }
             if (!String.IsNullOrWhiteSpace(value))
@@ -817,7 +864,7 @@ namespace LibZConfig.Common.Config
         /// <param name="field">Property to update</param>
         /// <param name="attr">Config attribute annotation</param>
         /// <returns>Updated Target Type instance.</returns>
-        private static T ProcessField<T>(ConfigPathNode node, T target, FieldInfo field, ConfigAttribute attr)
+        private static T ProcessField<T>(ConfigPathNode node, T target, FieldInfo field, ConfigAttribute attr, List<string> valuePaths)
         {
             string pname = attr.Name;
             if (String.IsNullOrWhiteSpace(pname))
@@ -849,6 +896,10 @@ namespace LibZConfig.Common.Config
                     {
                         value = vn.GetValue();
                     }
+                    if (valuePaths != null)
+                    {
+                        valuePaths.Add(pnode.GetSearchPath());
+                    }
                 }
             }
             if (!String.IsNullOrWhiteSpace(value))
@@ -874,7 +925,7 @@ namespace LibZConfig.Common.Config
         /// <param name="field">Property to update</param>
         /// <param name="configValue">Config value annotation</param>
         /// <returns>Updated Target Type instance.</returns>
-        private static T ProcessField<T>(ConfigPathNode node, T target, FieldInfo field, ConfigValue configValue)
+        private static T ProcessField<T>(ConfigPathNode node, T target, FieldInfo field, ConfigValue configValue, List<string> valuePaths)
         {
             string pname = configValue.Name;
             if (String.IsNullOrWhiteSpace(pname))
@@ -899,49 +950,56 @@ namespace LibZConfig.Common.Config
             if (node != null)
             {
                 AbstractConfigNode cnode = node.GetChildNode(pname);
-                if (cnode.GetType() == typeof(ConfigValueNode))
+                if (cnode != null)
                 {
-                    ConfigValueNode vn = (ConfigValueNode)cnode;
-                    if (vn != null)
+                    if (valuePaths != null)
                     {
-                        value = vn.GetValue();
+                        valuePaths.Add(cnode.GetSearchPath());
                     }
-                    if (!String.IsNullOrWhiteSpace(value))
+                    if (cnode.GetType() == typeof(ConfigValueNode))
                     {
-                        object v = GetValue<T>(pname, value, configValue.Function, field.FieldType, target, configValue.Required);
-                        if (v != null)
-                            TypeUtils.CallSetter(field, target, v);
-                    }
-                }
-                else
-                {
-                    if (ReflectionUtils.IsSubclassOfRawGeneric(field.FieldType, typeof(List<>)))
-                    {
-                        if (cnode.GetType() == typeof(ConfigListValueNode))
+                        ConfigValueNode vn = (ConfigValueNode)cnode;
+                        if (vn != null)
                         {
-                            ConfigListValueNode configList = (ConfigListValueNode)cnode;
-                            List<string> values = configList.GetValueList();
-                            if (values != null)
-                            {
-                                Type inner = field.FieldType.GetGenericArguments()[0];
-                                object v = ReflectionUtils.ConvertListFromStrings(inner, values);
-                                if (v != null)
-                                    TypeUtils.CallSetter(field, target, v);
-                            }
+                            value = vn.GetValue();
+                        }
+                        if (!String.IsNullOrWhiteSpace(value))
+                        {
+                            object v = GetValue<T>(pname, value, configValue.Function, field.FieldType, target, configValue.Required);
+                            if (v != null)
+                                TypeUtils.CallSetter(field, target, v);
                         }
                     }
-                    else if (ReflectionUtils.IsSubclassOfRawGeneric(field.FieldType, typeof(HashSet<>)))
+                    else
                     {
-                        if (cnode.GetType() == typeof(ConfigListValueNode))
+                        if (ReflectionUtils.IsSubclassOfRawGeneric(field.FieldType, typeof(List<>)))
                         {
-                            ConfigListValueNode configList = (ConfigListValueNode)cnode;
-                            List<string> values = configList.GetValueList();
-                            if (values != null)
+                            if (cnode.GetType() == typeof(ConfigListValueNode))
                             {
-                                Type inner = field.FieldType.GetGenericArguments()[0];
-                                object v = ReflectionUtils.ConvertSetFromStrings(inner, values);
-                                if (v != null)
-                                    TypeUtils.CallSetter(field, target, v);
+                                ConfigListValueNode configList = (ConfigListValueNode)cnode;
+                                List<string> values = configList.GetValueList();
+                                if (values != null)
+                                {
+                                    Type inner = field.FieldType.GetGenericArguments()[0];
+                                    object v = ReflectionUtils.ConvertListFromStrings(inner, values);
+                                    if (v != null)
+                                        TypeUtils.CallSetter(field, target, v);
+                                }
+                            }
+                        }
+                        else if (ReflectionUtils.IsSubclassOfRawGeneric(field.FieldType, typeof(HashSet<>)))
+                        {
+                            if (cnode.GetType() == typeof(ConfigListValueNode))
+                            {
+                                ConfigListValueNode configList = (ConfigListValueNode)cnode;
+                                List<string> values = configList.GetValueList();
+                                if (values != null)
+                                {
+                                    Type inner = field.FieldType.GetGenericArguments()[0];
+                                    object v = ReflectionUtils.ConvertSetFromStrings(inner, values);
+                                    if (v != null)
+                                        TypeUtils.CallSetter(field, target, v);
+                                }
                             }
                         }
                     }
