@@ -13,6 +13,39 @@ using Version = LibZConfig.Common.Config.Version;
 namespace LibZConfigClient.Src
 {
     /// <summary>
+    /// Local Struct to store the autowired instances
+    /// loaded by this Configuration Manager.
+    /// </summary>
+    public class AutowiredIndexStruct
+    {
+        /// <summary>
+        /// Instance Type
+        /// </summary>
+        public Type Type { get; set; }
+        /// <summary>
+        /// Configuration Name
+        /// </summary>
+        public string ConfigName { get; set; }
+        /// <summary>
+        /// Relative Path instance loaded from.
+        /// </summary>
+        public string RelativePath { get; set; }
+        /// <summary>
+        /// Loaded instance handle.
+        /// </summary>
+        public object Instance { get; set; }
+
+        public override string ToString()
+        {
+            return "AutowiredIndexStruct{" +
+                   "configName='" + ConfigName + '\'' +
+                   ", type=" + Type.FullName +
+                   ", relativePath='" + RelativePath + '\'' +
+                   '}';
+        }
+    }
+
+    /// <summary>
     /// Class loads and manages configuration instances and annotated class instances.
     /// </summary>
     public class ConfigurationManager
@@ -24,7 +57,7 @@ namespace LibZConfigClient.Src
         private Dictionary<string, Configuration> loadedConfigs = new Dictionary<string, Configuration>();
         private Dictionary<string, ReaderWriterLock> configLocks = new Dictionary<string, ReaderWriterLock>();
         private Dictionary<string, object> autowiredObjects = new Dictionary<string, object>();
-        private ConcurrentMultiMap<string, object> autowiredIndex = new ConcurrentMultiMap<string, object>();
+        private ConcurrentMultiMap<string, AutowiredIndexStruct> autowiredIndex = new ConcurrentMultiMap<string, AutowiredIndexStruct>();
 
         /// <summary>
         /// Load a configuration from local/remote location.
@@ -367,11 +400,17 @@ namespace LibZConfigClient.Src
                                     {
                                         ConfigurationAnnotationProcessor.Process<T>(config, value, out valuePaths);
                                     }
-                                    if (valuePaths != null && valuePaths.Count > 0)
+                                    if (valuePaths != null && valuePaths.Count > 0 && (config.SyncMode == ESyncMode.BATCH || config.SyncMode == ESyncMode.EVENTS))
                                     {
-                                        foreach(string vp in valuePaths)
+                                        AutowiredIndexStruct ais = new AutowiredIndexStruct();
+                                        ais.ConfigName = configName;
+                                        ais.Type = type;
+                                        ais.RelativePath = path;
+                                        ais.Instance = value;
+
+                                        foreach (string vp in valuePaths)
                                         {
-                                            autowiredIndex.Add(vp, value);
+                                            autowiredIndex.Add(vp, ais);
                                         }
                                     }
                                 }
