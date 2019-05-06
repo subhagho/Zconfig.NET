@@ -223,6 +223,54 @@ namespace LibZConfigClient.Src
             return null;
         }
 
+        public void ApplyConfigurationUpdates(string configName, List<string> paths)
+        {
+            Preconditions.CheckArgument(configName);
+            Preconditions.CheckArgument(paths);
+
+            Configuration configuration = GetConfiguration(configName);
+            if (configuration != null && (configuration.SyncMode == ESyncMode.BATCH || configuration.SyncMode == ESyncMode.EVENTS))
+            {
+                Dictionary<int, AutowiredIndexStruct> updated = GetUpdatedTypes(configName, paths);
+                if (updated != null && updated.Count > 0)
+                {
+                    foreach(int index in updated.Keys)
+                    {
+                        
+                    }
+                }
+            }
+        }
+
+        private Dictionary<int, AutowiredIndexStruct> GetUpdatedTypes(string configName, List<string> paths)
+        {
+            Dictionary<int, AutowiredIndexStruct> map = new Dictionary<int, AutowiredIndexStruct>();
+            foreach (string path in paths)
+            {
+                string indexKey = GetTypeIndexKey(path, configName);
+                if (autowiredIndex.ContainsKey(indexKey))
+                {
+                    HashSet<AutowiredIndexStruct> values = autowiredIndex[indexKey];
+                    if (values != null && values.Count > 0)
+                    {
+                        foreach (AutowiredIndexStruct value in values)
+                        {
+                            int indx = value.GetHashCode();
+                            if (!map.ContainsKey(indx))
+                            {
+                                map[indx] = value;
+                            }
+                        }
+                    }
+                }
+            }
+            if (map.Count <= 0)
+            {
+                return null;
+            }
+            return map;
+        }
+
         /// <summary>
         /// Get a configuration handle and lock it for updates.
         /// </summary>
@@ -335,14 +383,61 @@ namespace LibZConfigClient.Src
         /// Create/Get an instance of an autowired object.
         /// </summary>
         /// <typeparam name="T">Type of Object</typeparam>
-        /// <param name="configName">Configuration Name (should be loaded)</param>
-        /// <param name="path">Path in the configuration</param>
-        /// <returns>Object Instance</returns>
-        public T AutowireType<T>(string configName, string path)
+        /// <param name="updated">Autowired Index for the updated type</param>
+        private void UpdateAutowireType<T>(AutowiredIndexStruct updated)
         {
-            Preconditions.CheckArgument(configName);
-            return AutowireType<T>(configName, path, false);
+            Preconditions.CheckArgument(updated);
+
+            Type type = typeof(T);
+            string key = GetTypeKey(type, updated.RelativePath, updated.ConfigName);
+            if (!String.IsNullOrWhiteSpace(key))
+            {
+                if (!autowiredObjects.ContainsKey(key))
+                {
+                    lock (autowiredObjects)
+                    {
+                        if (autowiredObjects.ContainsKey(key))
+                        {
+                            Configuration config = ReadLockConfig(updated.ConfigName, DEFAULT_READ_LOCK_TIMEOUT);
+                            if (config != null)
+                            {
+                                try
+                                {
+                                    T value = (T)autowiredObjects[key];
+
+                                    List<string> valuePaths = null;
+                                    if (!String.IsNullOrWhiteSpace(updated.RelativePath))
+                                    {
+                                        AbstractConfigNode node = config.Find(updated.RelativePath);
+                                        if (node == null)
+                                        {
+                                            throw new ConfigurationException(
+                                                String.Format("Specified configuration node not found. [config={0}][path={1}]", 
+                                                updated.ConfigName, updated.RelativePath));
+                                        }
+                                        ConfigurationAnnotationProcessor.Process<T>(node, value, out valuePaths);
+                                    }
+                                    else
+                                    {
+                                        ConfigurationAnnotationProcessor.Process<T>(config, value, out valuePaths);
+                                    }
+                                }
+                                finally
+                                {
+                                    ConfigReleaseRead(config.Header.Name);
+                                }
+                            }
+                            else
+                            {
+                                throw new ConfigurationException(
+                                    String.Format("Error getting confguration. (Might be a lock timeout) [name={0}]", updated.ConfigName));
+                            }
+                        }
+                    }
+                }
+            }
         }
+
 
         /// <summary>
         /// Create/Get an instance of an autowired object.
@@ -352,7 +447,7 @@ namespace LibZConfigClient.Src
         /// <param name="path">Path in the configuration</param>
         /// <param name="update">Node path updated</param>
         /// <returns>Object Instance</returns>
-        private T AutowireType<T>(string configName, string path, bool update)
+        private T AutowireType<T>(string configName, string path)
         {
             Preconditions.CheckArgument(configName);
 
@@ -360,11 +455,11 @@ namespace LibZConfigClient.Src
             string key = GetTypeKey(type, path, configName);
             if (!String.IsNullOrWhiteSpace(key))
             {
-                if (!autowiredObjects.ContainsKey(key) || update)
+                if (!autowiredObjects.ContainsKey(key))
                 {
                     lock (autowiredObjects)
                     {
-                        if (!autowiredObjects.ContainsKey(key) || update)
+                        if (!autowiredObjects.ContainsKey(key))
                         {
                             Configuration config = ReadLockConfig(configName, DEFAULT_READ_LOCK_TIMEOUT);
                             if (config != null)
@@ -372,19 +467,10 @@ namespace LibZConfigClient.Src
                                 try
                                 {
                                     T value = default(T);
-                                    if (update)
-                                    {
-                                        if (!autowiredObjects.ContainsKey(key))
-                                        {
-                                            throw new ConfigurationException(String.Format("Update called on an instance not loaded. [type={0}]", type.FullName));
-                                        }
-                                        value = (T)autowiredObjects[key];
-                                    }
-                                    else
-                                    {
-                                        value = Activator.CreateInstance<T>();
-                                        autowiredObjects[key] = value;
-                                    }
+
+                                    value = Activator.CreateInstance<T>();
+                                    autowiredObjects[key] = value;
+
                                     List<string> valuePaths = null;
                                     if (!String.IsNullOrWhiteSpace(path))
                                     {
@@ -410,7 +496,8 @@ namespace LibZConfigClient.Src
 
                                         foreach (string vp in valuePaths)
                                         {
-                                            autowiredIndex.Add(vp, ais);
+                                            string vk = GetTypeIndexKey(vp, configName);
+                                            autowiredIndex.Add(vk, ais);
                                         }
                                     }
                                 }
@@ -431,6 +518,17 @@ namespace LibZConfigClient.Src
             }
             throw new ConfigurationException(
                 String.Format("Error creating autowired instance. [type={0}][config={1}]", type.FullName, configName));
+        }
+
+        /// <summary>
+        /// Get the Autowired Index key.
+        /// </summary>
+        /// <param name="path">Node Path</param>
+        /// <param name="configName">Configuration Name</param>
+        /// <returns></returns>
+        private string GetTypeIndexKey(string path, string configName)
+        {
+            return String.Format("{0}::{1}", configName, path);
         }
 
         /// <summary>
