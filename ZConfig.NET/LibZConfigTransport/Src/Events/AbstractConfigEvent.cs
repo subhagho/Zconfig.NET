@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using LibZConfig.Common;
 
 namespace LibZConfigTransport.Events
 {
@@ -75,12 +76,58 @@ namespace LibZConfigTransport.Events
     ///     }
     /// </pre>
     /// </summary>
-    public abstract class AbstractConfigEvent
+    public abstract class AbstractConfigEvent<T>
     {
+        public ConfigUpdateHeader Header { get; set; }
         public EUpdateEventType EventType { get; set; }
         public string Path { get; set; }
         public string TransactionId { get; set; }
         public long TransactionSeq { get; set; }
         public long Timestamp { get; set; }
+        public T Data { get; set; }
+
+        public AbstractConfigEvent(string group, string application, string config)
+        {
+            Preconditions.CheckArgument(group);
+            Preconditions.CheckArgument(application);
+
+            Header = new ConfigUpdateHeader();
+            Header.Timestamp = DateTime.Now.Ticks;
+            Header.Group = group;
+            Header.Application = application;
+            Header.ConfigName = config;
+        }
+    }
+
+    public abstract class AbstractConfigBatch<T>
+    {
+        public ConfigUpdateHeader Header { get; set; }
+        public int BatchCount { get; set; }
+        public List<AbstractConfigEvent<T>> Data { get; set; }
+
+        public AbstractConfigBatch(string group, string application, string config)
+        {
+            Preconditions.CheckArgument(group);
+            Preconditions.CheckArgument(application);
+
+            Header = new ConfigUpdateHeader();
+            Header.TransactionId = Guid.NewGuid().ToString();
+            Header.Timestamp = DateTime.Now.Ticks;
+            Header.Group = group;
+            Header.Application = application;
+            Header.ConfigName = config;
+        }
+
+        public AbstractConfigBatch<T> Add(AbstractConfigEvent<T> data)
+        {
+            Preconditions.CheckArgument(data);
+            if (Data == null)
+            {
+                Data = new List<AbstractConfigEvent<T>>();
+            }
+            Data.Add(data);
+            BatchCount++;
+            return this;
+        }
     }
 }
