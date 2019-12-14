@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>library</OutputType>
+    <OutputType>Library</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RootNamespace>LibZConfig.Common</RootNamespace>
-    <Version>0.1.6.004</Version>
+    <Version>0.1.6.007</Version>
     <PackageProjectUrl>https://github.com/subhagho/Zconfig.NET</PackageProjectUrl>
     <RepositoryUrl>https://github.com/subhagho/Zconfig.NET</RepositoryUrl>
     <RepositoryType>github</RepositoryType>
@@ -26,9 +26,11 @@
     <Authors>Subho Ghosh</Authors>
     <Company>CodeKutter</Company>
     <Product>ZConfig</Product>
-    <AssemblyVersion>0.1.6.4</AssemblyVersion>
-    <FileVersion>0.1.6.4</FileVersion>
+    <AssemblyVersion>0.1.6.7</AssemblyVersion>
+    <FileVersion>0.1.6.7</FileVersion>
     <PackageReleaseNotes>https://github.com/subhagho/Zconfig.NET/commit/35f5f930441f3fa9981affa44419d830a4487359</PackageReleaseNotes>
+    <ApplicationIcon />
+    <StartupObject />
   </PropertyGroup>
 
   <ItemGroup>
