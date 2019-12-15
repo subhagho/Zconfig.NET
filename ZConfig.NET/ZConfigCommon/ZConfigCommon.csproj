@@ -1,0 +1,50 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <PackageId>CodeKutter.ZConfig.Common</PackageId>
+    <Version>0.2.0</Version>
+    <Authors>Subho Ghosh</Authors>
+    <Company>CodeKutter</Company>
+    <Product>ZConfig</Product>
+    <Description>DotNet port of the ZConfig Configuration Library.
+
+                Freatures
+                XML/JSON configuration definitions.
+                Read from local/remote locations.
+                Nested Configuration files (included)
+                Auto-wiring of Objects
+                Auto-invoke methods during auto-wiring
+</Description>
+    <Copyright>Subho Ghosh (subho dot ghosh at outlook dot com), 2019</Copyright>
+    <PackageLicenseFile>license.txt</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/subhagho/Zconfig.NET</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/subhagho/Zconfig.NET</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageTags>configuration auto-wiring</PackageTags>
+    <NeutralLanguage>English</NeutralLanguage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\..\..\Users\subho\.nuget\packages\nlog.config\4.6.8\contentFiles\any\any\NLog.config" Link="NLog.config">
+      <Private>True</Private>
+      <NuGetPackageVersion>4.6.8</NuGetPackageVersion>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <NuGetItemType>None</NuGetItemType>
+      <TargetPath>NLog.config</TargetPath>
+      <NuGetPackageId>NLog.Config</NuGetPackageId>
+    </None>
+    <None Include="license.txt">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="NLog" Version="4.6.8" />
+    <PackageReference Include="NLog.Config" Version="4.6.8" />
+    <PackageReference Include="SharpZipLib" Version="1.2.0" />
+  </ItemGroup>
+
+</Project>

@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LibZConfigCommon\LibZConfigCommon.csproj" />
+    <ProjectReference Include="..\ZConfigCommon\ZConfigCommon.csproj" />
   </ItemGroup>
 
 </Project>
